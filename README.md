@@ -46,12 +46,20 @@ Our extension uses strict, modern **Manifest V3** security rules.
    - Go to the **Permissions** tab.
    - Toggle **"Access your data for all websites"** to **ON**.
 
-### 2️⃣ Google Chrome / Brave / Edge
+### 3️⃣ Google Chrome / Brave / Edge
 1. Navigate to your browser's extension dashboard (e.g. `chrome://extensions/`).
 2. Toggle **"Developer mode"** ON.
 3. Click the **"Load unpacked"** button.
 4. Select the entire `zen-extension` folder.
 *(Note: Since Chromium browsers use Service Workers instead of background scripts, you may need to open `manifest.json` and change `"scripts": ["background.js"]` to `"service_worker": "background.js"`).*
+
+### 4️⃣ Apple Safari
+Because Safari uses native macOS app packaging for extensions:
+1. Open your terminal and run Apple's command-line converter:
+   `xcrun safari-web-extension-converter /path/to/zen-extension`
+2. Open the newly generated project in Xcode.
+3. Build and run the project to register the extension.
+4. Go to **Safari Preferences > Extensions** and enable it!
 
 ---
 *Coded for absolute focus.* 🥷

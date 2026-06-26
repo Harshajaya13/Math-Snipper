@@ -125,29 +125,44 @@ if (typeof window.zenIsActive === 'undefined') {
     
     const titleDiv = document.createElement('div');
     titleDiv.id = 'zen-scratchpad-title';
-    titleDiv.innerText = '📝 Scratch Pad';
+    titleDiv.innerHTML = '<span>📝 Scratch Pad</span>';
+    
+    const btnContainer = document.createElement('div');
+    btnContainer.style.display = 'flex';
+    btnContainer.style.gap = '8px';
+
+    const previewBtn = document.createElement('button');
+    previewBtn.innerText = '👁️ Preview';
+    previewBtn.style.background = 'none';
+    previewBtn.style.border = '1px solid currentColor';
+    previewBtn.style.color = 'inherit';
+    previewBtn.style.borderRadius = '4px';
+    previewBtn.style.padding = '2px 8px';
+    previewBtn.style.cursor = 'pointer';
+    previewBtn.style.fontSize = '12px';
     
     const clearBtn = document.createElement('button');
     clearBtn.innerText = 'Clear';
     clearBtn.style.background = 'none';
     clearBtn.style.border = '1px solid currentColor';
-    clearBtn.style.color = 'inherit';
+    clearBtn.style.color = '#f87171';
     clearBtn.style.borderRadius = '4px';
     clearBtn.style.padding = '2px 8px';
     clearBtn.style.cursor = 'pointer';
     clearBtn.style.fontSize = '12px';
-    clearBtn.onclick = () => {
-      if(confirm('Clear all notes?')) {
-        textarea.value = '';
-        localStorage.removeItem('zen_scratchpad_content');
-      }
-    };
-    titleDiv.appendChild(clearBtn);
+    
+    btnContainer.appendChild(previewBtn);
+    btnContainer.appendChild(clearBtn);
+    titleDiv.appendChild(btnContainer);
 
     const textarea = document.createElement('textarea');
     textarea.id = 'zen-scratchpad-textarea';
-    textarea.placeholder = 'Type your calculations or notes here...\n\n(Auto-saves automatically)';
+    textarea.placeholder = 'Type calculations or paste LaTeX here...\n\n(Auto-saves automatically)';
     
+    const previewDiv = document.createElement('div');
+    previewDiv.id = 'zen-scratchpad-preview';
+    previewDiv.style.display = 'none';
+
     // Restore saved notes
     const savedNotes = localStorage.getItem('zen_scratchpad_content');
     if (savedNotes) {
@@ -159,8 +174,61 @@ if (typeof window.zenIsActive === 'undefined') {
       localStorage.setItem('zen_scratchpad_content', e.target.value);
     });
 
+    clearBtn.onclick = () => {
+      if(confirm('Clear all notes?')) {
+        textarea.value = '';
+        localStorage.removeItem('zen_scratchpad_content');
+        if (previewDiv.style.display === 'block') previewBtn.click(); // switch back to edit
+      }
+    };
+
+    previewBtn.onclick = () => {
+      if (textarea.style.display !== 'none') {
+        // Switch to preview mode
+        textarea.style.display = 'none';
+        previewDiv.style.display = 'block';
+        previewBtn.innerText = '✏️ Edit';
+        
+        let safeHTML = textarea.value.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        previewDiv.innerHTML = safeHTML;
+        
+        // Inject script to render math using the host page's MathJax/KaTeX
+        const script = document.createElement('script');
+        script.textContent = `
+          try {
+            let p = document.getElementById('zen-scratchpad-preview');
+            if (typeof MathJax !== 'undefined') {
+              if (MathJax.typesetPromise) {
+                MathJax.typesetPromise([p]).catch(e => console.log(e));
+              } else if (MathJax.Hub && MathJax.Hub.Queue) {
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub, p]);
+              }
+            } else if (typeof renderMathInElement === 'function') {
+              renderMathInElement(p, {
+                delimiters: [
+                  {left: "$$", right: "$$", display: true},
+                  {left: "\\\\[", right: "\\\\]", display: true},
+                  {left: "$", right: "$", display: false},
+                  {left: "\\\\(", right: "\\\\)", display: false}
+                ]
+              });
+            }
+          } catch(e) {}
+        `;
+        document.body.appendChild(script);
+        setTimeout(() => script.remove(), 100);
+        
+      } else {
+        // Switch to edit mode
+        textarea.style.display = 'block';
+        previewDiv.style.display = 'none';
+        previewBtn.innerText = '👁️ Preview';
+      }
+    };
+
     padDiv.appendChild(titleDiv);
     padDiv.appendChild(textarea);
+    padDiv.appendChild(previewDiv);
     document.body.appendChild(padDiv);
     
     // Shift content so it doesn't overlap

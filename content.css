@@ -309,6 +309,23 @@ body.zen-theme-hacker .zen-isolated-element {
   border-color: #8b5cf6 !important;
 }
 
+#zen-scratchpad-preview {
+  flex-grow: 1 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  background: rgba(0,0,0,0.3) !important;
+  border: 1px solid #555 !important;
+  border-radius: 8px !important;
+  color: #ddd !important;
+  padding: 12px !important;
+  font-family: sans-serif !important;
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.2) !important;
+  overflow-y: auto !important;
+  white-space: pre-wrap !important;
+}
+
 /* Push content to the left when Scratch Pad is open to prevent overlapping */
 body.zen-scratchpad-open .zen-isolated-element {
   margin-left: 5% !important;
@@ -320,7 +337,9 @@ body.zen-scratchpad-open .zen-isolated-element {
 body.zen-theme-paper #zen-scratchpad { background: rgba(255, 255, 255, 0.95) !important; border-color: #ccc !important; }
 body.zen-theme-paper #zen-scratchpad-title { color: #333 !important; }
 body.zen-theme-paper #zen-scratchpad-textarea { background: #fdfbf7 !important; color: #222 !important; border-color: #ddd !important; }
+body.zen-theme-paper #zen-scratchpad-preview { background: #fdfbf7 !important; color: #222 !important; border-color: #ddd !important; }
 
 body.zen-theme-hacker #zen-scratchpad { background: rgba(0, 0, 0, 0.95) !important; border-color: #0f0 !important; }
 body.zen-theme-hacker #zen-scratchpad-title { color: #0f0 !important; }
 body.zen-theme-hacker #zen-scratchpad-textarea { background: #050505 !important; color: #0f0 !important; border-color: #0f0 !important; }
+body.zen-theme-hacker #zen-scratchpad-preview { background: #050505 !important; color: #0f0 !important; border-color: #0f0 !important; }
