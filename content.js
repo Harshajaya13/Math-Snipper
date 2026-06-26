@@ -4,6 +4,21 @@ if (typeof window.zenIsActive === 'undefined') {
   window.zenIsSelecting = false;
   window.zenCurrentHover = null;
   window.zenDeletedStack = []; // Stack for undo functionality
+  window.zenIsCopying = false; // Copy Mode state
+
+  function showToast(msg, duration = 3000) {
+    let toast = document.getElementById('zen-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'zen-toast';
+      document.body.appendChild(toast);
+    }
+    toast.innerText = msg;
+    toast.classList.add('zen-show');
+    setTimeout(() => {
+      toast.classList.remove('zen-show');
+    }, duration);
+  }
 
   function getCssPath(el) {
     if (!(el instanceof Element)) return '';
@@ -232,14 +247,19 @@ if (typeof window.zenIsActive === 'undefined') {
   document.addEventListener('mouseover', (e) => {
     window.zenCurrentHover = e.target;
     
-    // Add visual feedback for the Eraser Tool
+    // Add visual feedback for the Tools
     if (window.zenIsActive && e.target !== document.body && e.target !== document.documentElement) {
       // Clean up previous
       document.querySelectorAll('.zen-eraser-hover').forEach(el => el.classList.remove('zen-eraser-hover'));
+      document.querySelectorAll('.zen-copy-hover').forEach(el => el.classList.remove('zen-copy-hover'));
       
-      // Only highlight if it's inside the isolated element to avoid highlighting menus
+      // Only highlight if it's inside the isolated element
       if (e.target.closest('.zen-isolated-element')) {
-        e.target.classList.add('zen-eraser-hover');
+        if (window.zenIsCopying) {
+          e.target.classList.add('zen-copy-hover');
+        } else {
+          e.target.classList.add('zen-eraser-hover');
+        }
       }
     }
   }, true);
@@ -247,6 +267,7 @@ if (typeof window.zenIsActive === 'undefined') {
   document.addEventListener('mouseout', (e) => {
     if (window.zenIsActive) {
       e.target.classList.remove('zen-eraser-hover');
+      e.target.classList.remove('zen-copy-hover');
     }
   }, true);
 
@@ -265,6 +286,17 @@ if (typeof window.zenIsActive === 'undefined') {
 
     // Exit on Q or Escape
     if (e.key.toLowerCase() === 'q' || e.key === 'Escape') {
+      if (window.zenIsCopying) {
+        window.zenIsCopying = false;
+        const optCopy = document.querySelector('.zen-theme-option-copy');
+        if (optCopy) {
+            optCopy.innerText = '📋 Copy Smart Text (LaTeX)';
+            optCopy.style.color = '#38bdf8';
+        }
+        showToast("Exited Copy Mode");
+        document.querySelectorAll('.zen-copy-hover').forEach(el => el.classList.remove('zen-copy-hover'));
+        return; // Don't exit Zen mode yet, just exit copy mode
+      }
       if (window.zenIsActive || window.zenIsSelecting) {
         resetZenMode();
       }
@@ -279,13 +311,31 @@ if (typeof window.zenIsActive === 'undefined') {
       return; // prevent default browser undo behavior if any
     }
 
-    // Delete hovered element with D or X
-    if ((e.key.toLowerCase() === 'd' || e.key.toLowerCase() === 'x') && window.zenIsActive && window.zenCurrentHover) {
+    // Delete hovered element with D or X (Only if NOT copying)
+    if (!window.zenIsCopying && (e.key.toLowerCase() === 'd' || e.key.toLowerCase() === 'x') && window.zenIsActive && window.zenCurrentHover) {
       if (window.zenCurrentHover !== document.body && 
           window.zenCurrentHover !== document.documentElement &&
           window.zenCurrentHover.id !== 'zen-snipper-reset') {
         window.zenCurrentHover.classList.add('zen-hidden');
         window.zenDeletedStack.push(window.zenCurrentHover); // Save it to the stack
+      }
+    }
+
+    // Copy hovered element with C (Only if COPYING)
+    if (window.zenIsCopying && e.key.toLowerCase() === 'c' && window.zenIsActive && window.zenCurrentHover) {
+      if (window.zenCurrentHover !== document.body && 
+          window.zenCurrentHover !== document.documentElement &&
+          window.zenCurrentHover.id !== 'zen-snipper-reset') {
+        
+        copySmartElement(window.zenCurrentHover);
+        
+        // Visual feedback flash
+        const oldBg = window.zenCurrentHover.style.backgroundColor;
+        window.zenCurrentHover.style.backgroundColor = 'rgba(74, 222, 128, 0.4)';
+        showToast("✅ Copied block to clipboard!", 2000);
+        setTimeout(() => {
+          window.zenCurrentHover.style.backgroundColor = oldBg;
+        }, 300);
       }
     }
   }, true);
@@ -433,6 +483,31 @@ if (typeof window.zenIsActive === 'undefined') {
       menu.appendChild(opt);
     });
 
+    // Add Smart Copy Toggle
+    let optCopy = document.createElement('button');
+    optCopy.className = 'zen-theme-option zen-theme-option-copy';
+    optCopy.style.marginTop = '4px';
+    optCopy.style.borderTop = '1px solid #444';
+    optCopy.style.background = 'transparent';
+    optCopy.style.color = '#38bdf8';
+    optCopy.innerText = '📋 Copy Smart Text (LaTeX)';
+    optCopy.onclick = (e) => {
+      e.stopPropagation();
+      window.zenIsCopying = !window.zenIsCopying;
+      if (window.zenIsCopying) {
+        optCopy.innerText = '🛑 Exit Copy Mode';
+        optCopy.style.color = '#f87171';
+        showToast("Hover over any block and press 'C' to copy!");
+      } else {
+        optCopy.innerText = '📋 Copy Smart Text (LaTeX)';
+        optCopy.style.color = '#38bdf8';
+        showToast("Exited Copy Mode");
+        document.querySelectorAll('.zen-copy-hover').forEach(el => el.classList.remove('zen-copy-hover'));
+      }
+      menu.classList.remove('zen-show');
+    };
+    menu.appendChild(optCopy);
+
     // Add Timer Toggle
     let optTimer = document.createElement('button');
     optTimer.className = 'zen-theme-option';
@@ -524,5 +599,66 @@ if (typeof window.zenIsActive === 'undefined') {
     
     if (zenTimerInterval) clearInterval(zenTimerInterval);
     zenTimerInterval = null;
+  }
+
+  // --- SMART COPY LOGIC ---
+  function copySmartElement(target) {
+    if (!target) return;
+    
+    let clone = target.cloneNode(true);
+    
+    // Clean out deleted elements from Eraser Tool
+    clone.querySelectorAll('.zen-hidden').forEach(el => el.remove());
+    
+    // MathJax v2: <script type="math/tex">
+    let scripts = clone.querySelectorAll('script[type^="math/tex"]');
+    scripts.forEach(script => {
+      let tex = script.textContent;
+      let isDisplay = script.type.includes('mode=display');
+      let textNode = document.createTextNode(isDisplay ? `\n$$${tex}$$\n` : ` $${tex}$ `);
+      
+      // Attempt to remove the rendered MathJax span (usually previous sibling)
+      let prev = script.previousElementSibling;
+      while(prev && prev.className && typeof prev.className === 'string' && prev.className.includes('MathJax')) {
+        let toRemove = prev;
+        prev = prev.previousElementSibling;
+        toRemove.remove();
+      }
+      script.parentNode.replaceChild(textNode, script);
+    });
+    
+    // MathJax v3 / KaTeX: <annotation encoding="application/x-tex">
+    let annotations = clone.querySelectorAll('annotation[encoding="application/x-tex"]');
+    annotations.forEach(ann => {
+      let tex = ann.textContent;
+      let wrapper = ann.closest('.katex') || ann.closest('mjx-container') || ann.closest('.MathJax');
+      if (wrapper) {
+        let isDisplay = false;
+        if (wrapper.tagName.toLowerCase() === 'mjx-container' && wrapper.getAttribute('display') === 'true') isDisplay = true;
+        if (wrapper.classList && wrapper.classList.contains('katex-display')) isDisplay = true;
+        
+        let textNode = document.createTextNode(isDisplay ? `\n$$${tex}$$\n` : ` $${tex}$ `);
+        wrapper.parentNode.replaceChild(textNode, wrapper);
+      }
+    });
+
+    // Strip remaining scripts and styles
+    clone.querySelectorAll('script, style, noscript').forEach(el => el.remove());
+
+    // Fix squashed newlines by temporarily appending to DOM
+    clone.style.position = 'absolute';
+    clone.style.left = '-9999px';
+    clone.style.width = target.offsetWidth + 'px'; // Match width for block rendering
+    document.body.appendChild(clone);
+    let finalContent = clone.innerText.trim();
+    document.body.removeChild(clone);
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(finalContent).then(() => {
+      console.log("Zen Snipper: Successfully copied smart text.");
+    }).catch(err => {
+      console.error("Zen Snipper: Could not copy text", err);
+      showToast("❌ Failed to copy to clipboard.");
+    });
   }
 }
