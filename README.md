@@ -61,4 +61,4 @@ Because Safari uses native macOS app packaging for extensions:
 4. Go to **Safari Preferences > Extensions** and enable it.
 
 ---
-*Vibe coded for absolute focus.* 🥷
+*coded for absolute focus.* 🥷
