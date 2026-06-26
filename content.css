@@ -1,0 +1,58 @@
+/* The hover effect to show what block is being selected */
+.zen-snipper-hover {
+  outline: 3px solid #8b5cf6 !important;
+  outline-offset: -3px !important;
+  cursor: crosshair !important;
+  background-color: rgba(139, 92, 246, 0.1) !important;
+  transition: all 0.2s ease !important;
+}
+
+/* When the page is in Zen Mode, we apply a beautiful dark theme to the remaining empty space */
+body.zen-snipper-active {
+  background: #121212 !important; /* Beautiful dark background */
+  background-image: radial-gradient(circle at 50% 0%, #2a2a35 0%, #121212 70%) !important;
+  color: #e0e0e0 !important;
+}
+
+/* Hide everything we tagged as hidden */
+.zen-hidden {
+  display: none !important;
+}
+
+/* Center and style the isolated content gracefully */
+.zen-isolated-element {
+  margin: 50px auto !important;
+  max-width: 900px !important;
+  background: #1e1e24 !important; /* Nice dark card */
+  padding: 40px !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+  border: 1px solid #333 !important;
+  position: relative !important;
+  z-index: 999999 !important;
+  
+  /* Ensure the block itself scrolls if it's too big, rather than the whole body, optional */
+  overflow: auto !important;
+}
+
+/* Reset button floating at the bottom right */
+#zen-snipper-reset {
+  position: fixed !important;
+  bottom: 30px !important;
+  right: 30px !important;
+  padding: 12px 24px !important;
+  background: #8b5cf6 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
+  font-family: sans-serif !important;
+  cursor: pointer !important;
+  z-index: 9999999 !important;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4) !important;
+  transition: transform 0.2s !important;
+}
+
+#zen-snipper-reset:hover {
+  transform: scale(1.05) !important;
+}

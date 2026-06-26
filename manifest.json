@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Zen Math Snipper",
+  "version": "1.0",
+  "description": "Isolate GATE questions and math blocks with custom zen styling.",
+  "permissions": ["activeTab", "scripting"],
+  "action": {
+    "default_title": "Activate Zen Snipper"
+  },
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+Z",
+        "mac": "Alt+Z"
+      },
+      "description": "Activate Zen Snipper"
+    }
+  }
+}
