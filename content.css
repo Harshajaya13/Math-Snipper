@@ -12,6 +12,13 @@ body.zen-snipper-active {
   color: #e0e0e0 !important;
 }
 
+/* Subtle hover effect for the Eraser Tool */
+.zen-eraser-hover {
+  outline: 1px dashed rgba(239, 68, 68, 0.6) !important;
+  outline-offset: -1px !important;
+  background-color: rgba(239, 68, 68, 0.05) !important;
+}
+
 /* --- THEMES --- */
 body.zen-theme-dark {
   background: #121212 !important;

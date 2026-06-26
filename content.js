@@ -231,6 +231,23 @@ if (typeof window.zenIsActive === 'undefined') {
 
   document.addEventListener('mouseover', (e) => {
     window.zenCurrentHover = e.target;
+    
+    // Add visual feedback for the Eraser Tool
+    if (window.zenIsActive && e.target !== document.body && e.target !== document.documentElement) {
+      // Clean up previous
+      document.querySelectorAll('.zen-eraser-hover').forEach(el => el.classList.remove('zen-eraser-hover'));
+      
+      // Only highlight if it's inside the isolated element to avoid highlighting menus
+      if (e.target.closest('.zen-isolated-element')) {
+        e.target.classList.add('zen-eraser-hover');
+      }
+    }
+  }, true);
+
+  document.addEventListener('mouseout', (e) => {
+    if (window.zenIsActive) {
+      e.target.classList.remove('zen-eraser-hover');
+    }
   }, true);
 
   // Prevent link clicks during Zen Mode
@@ -486,6 +503,8 @@ if (typeof window.zenIsActive === 'undefined') {
     
     const isolated = document.querySelectorAll('.zen-isolated-element');
     isolated.forEach(el => el.classList.remove('zen-isolated-element'));
+    
+    document.querySelectorAll('.zen-eraser-hover').forEach(el => el.classList.remove('zen-eraser-hover'));
     
     const noBg = document.querySelectorAll('.zen-no-bg');
     noBg.forEach(el => el.classList.remove('zen-no-bg'));
