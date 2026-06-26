@@ -3,6 +3,13 @@
   "name": "Zen Math Snipper",
   "version": "1.0",
   "description": "Isolate GATE questions and math blocks with custom zen styling.",
+  "author": "Harsha",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "zensnipper@harshajaya.com",
+      "strict_min_version": "109.0"
+    }
+  },
   "permissions": ["activeTab", "scripting"],
   "action": {
     "default_title": "Activate Zen Snipper"
