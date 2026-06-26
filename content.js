@@ -156,6 +156,7 @@ if (typeof window.zenIsActive === 'undefined') {
     while (current && current !== document.body && current !== document.documentElement) {
       let parent = current.parentElement;
       if (parent) {
+        parent.classList.add('zen-no-bg'); // Nuke watermarks on ancestors
         let siblings = parent.children;
         // For each sibling of our current path element
         for (let i = 0; i < siblings.length; i++) {
@@ -208,6 +209,9 @@ if (typeof window.zenIsActive === 'undefined') {
     
     const isolated = document.querySelectorAll('.zen-isolated-element');
     isolated.forEach(el => el.classList.remove('zen-isolated-element'));
+    
+    const noBg = document.querySelectorAll('.zen-no-bg');
+    noBg.forEach(el => el.classList.remove('zen-no-bg'));
 
     const btn = document.getElementById('zen-snipper-reset');
     if (btn) btn.remove();

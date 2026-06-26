@@ -42,6 +42,12 @@ body.zen-snipper-active {
   background-image: none !important;
 }
 
+/* Also nuke backgrounds on parent wrapper elements to kill watermarks behind the card */
+.zen-no-bg, .zen-no-bg::before, .zen-no-bg::after {
+  background-image: none !important;
+  background-color: transparent !important;
+}
+
 /* Reset button floating at the bottom right */
 #zen-snipper-reset {
   position: fixed !important;
