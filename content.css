@@ -217,3 +217,70 @@ body.zen-theme-hacker .zen-isolated-element {
 .zen-timer-controls button:hover {
   background: #8b5cf6 !important;
 }
+
+/* Scratch Pad */
+#zen-scratchpad {
+  position: fixed !important;
+  top: 80px !important;
+  right: 30px !important;
+  width: 380px !important;
+  height: calc(100vh - 180px) !important;
+  background: rgba(30, 30, 36, 0.95) !important;
+  border-radius: 12px !important;
+  border: 1px solid #444 !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+  z-index: 9999998 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 16px !important;
+  backdrop-filter: blur(10px) !important;
+  transition: all 0.3s ease !important;
+}
+
+#zen-scratchpad-title {
+  color: white !important;
+  font-family: sans-serif !important;
+  font-weight: bold !important;
+  font-size: 16px !important;
+  margin-bottom: 10px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+#zen-scratchpad-textarea {
+  flex-grow: 1 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  background: rgba(0,0,0,0.3) !important;
+  border: 1px solid #555 !important;
+  border-radius: 8px !important;
+  color: #ddd !important;
+  padding: 12px !important;
+  font-family: monospace !important;
+  font-size: 15px !important;
+  resize: none !important;
+  outline: none !important;
+  line-height: 1.6 !important;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.2) !important;
+}
+
+#zen-scratchpad-textarea:focus {
+  border-color: #8b5cf6 !important;
+}
+
+/* Push content to the left when Scratch Pad is open to prevent overlapping */
+body.zen-scratchpad-open .zen-isolated-element {
+  margin-left: 5% !important;
+  margin-right: 430px !important; /* Space for the 380px pad + 50px margin */
+  transition: all 0.3s ease !important;
+}
+
+/* Theme Overrides for Scratch Pad */
+body.zen-theme-paper #zen-scratchpad { background: rgba(255, 255, 255, 0.95) !important; border-color: #ccc !important; }
+body.zen-theme-paper #zen-scratchpad-title { color: #333 !important; }
+body.zen-theme-paper #zen-scratchpad-textarea { background: #fdfbf7 !important; color: #222 !important; border-color: #ddd !important; }
+
+body.zen-theme-hacker #zen-scratchpad { background: rgba(0, 0, 0, 0.95) !important; border-color: #0f0 !important; }
+body.zen-theme-hacker #zen-scratchpad-title { color: #0f0 !important; }
+body.zen-theme-hacker #zen-scratchpad-textarea { background: #050505 !important; color: #0f0 !important; border-color: #0f0 !important; }

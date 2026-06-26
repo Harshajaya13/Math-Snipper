@@ -101,6 +101,69 @@ if (typeof window.zenIsActive === 'undefined') {
     }
   }
 
+  // Scratchpad Logic
+  function createScratchpadUI() {
+    if (document.getElementById('zen-scratchpad')) return;
+    
+    const padDiv = document.createElement('div');
+    padDiv.id = 'zen-scratchpad';
+    
+    const titleDiv = document.createElement('div');
+    titleDiv.id = 'zen-scratchpad-title';
+    titleDiv.innerText = '📝 Scratch Pad';
+    
+    const clearBtn = document.createElement('button');
+    clearBtn.innerText = 'Clear';
+    clearBtn.style.background = 'none';
+    clearBtn.style.border = '1px solid currentColor';
+    clearBtn.style.color = 'inherit';
+    clearBtn.style.borderRadius = '4px';
+    clearBtn.style.padding = '2px 8px';
+    clearBtn.style.cursor = 'pointer';
+    clearBtn.style.fontSize = '12px';
+    clearBtn.onclick = () => {
+      if(confirm('Clear all notes?')) {
+        textarea.value = '';
+        localStorage.removeItem('zen_scratchpad_content');
+      }
+    };
+    titleDiv.appendChild(clearBtn);
+
+    const textarea = document.createElement('textarea');
+    textarea.id = 'zen-scratchpad-textarea';
+    textarea.placeholder = 'Type your calculations or notes here...\n\n(Auto-saves automatically)';
+    
+    // Restore saved notes
+    const savedNotes = localStorage.getItem('zen_scratchpad_content');
+    if (savedNotes) {
+      textarea.value = savedNotes;
+    }
+    
+    // Auto-save on type
+    textarea.addEventListener('input', (e) => {
+      localStorage.setItem('zen_scratchpad_content', e.target.value);
+    });
+
+    padDiv.appendChild(titleDiv);
+    padDiv.appendChild(textarea);
+    document.body.appendChild(padDiv);
+    
+    // Shift content so it doesn't overlap
+    document.body.classList.add('zen-scratchpad-open');
+  }
+
+  function toggleScratchpad() {
+    let padEl = document.getElementById('zen-scratchpad');
+    if (!padEl) {
+      createScratchpadUI();
+      localStorage.setItem('zen_scratchpad_active', 'true');
+    } else {
+      padEl.remove();
+      localStorage.setItem('zen_scratchpad_active', 'false');
+      document.body.classList.remove('zen-scratchpad-open');
+    }
+  }
+
   // Theme persistence functions
   function applyTheme(themeName) {
     document.body.classList.remove('zen-theme-dark', 'zen-theme-midnight', 'zen-theme-paper', 'zen-theme-hacker');
@@ -368,11 +431,29 @@ if (typeof window.zenIsActive === 'undefined') {
     };
     menu.appendChild(optTimer);
 
+    // Add Scratchpad Toggle
+    let optPad = document.createElement('button');
+    optPad.className = 'zen-theme-option';
+    optPad.style.background = 'transparent';
+    optPad.style.color = 'white';
+    optPad.innerText = '📝 Toggle Scratch Pad';
+    optPad.onclick = (e) => {
+      e.stopPropagation();
+      toggleScratchpad();
+      menu.classList.remove('zen-show');
+    };
+    menu.appendChild(optPad);
+
     document.body.appendChild(menu);
 
     // Restore timer if it was active
     if (localStorage.getItem('zen_timer_active') === 'true') {
       createTimerUI();
+    }
+    
+    // Restore scratchpad if it was active
+    if (localStorage.getItem('zen_scratchpad_active') === 'true') {
+      createScratchpadUI();
     }
 
     // Toggle menu
@@ -417,6 +498,11 @@ if (typeof window.zenIsActive === 'undefined') {
     if (menu) menu.remove();
     const timer = document.getElementById('zen-focus-timer');
     if (timer) timer.remove();
+    const pad = document.getElementById('zen-scratchpad');
+    if (pad) pad.remove();
+    
+    document.body.classList.remove('zen-scratchpad-open');
+    
     if (zenTimerInterval) clearInterval(zenTimerInterval);
     zenTimerInterval = null;
   }
