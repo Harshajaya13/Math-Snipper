@@ -35,6 +35,11 @@ body.zen-snipper-active {
   overflow: auto !important;
 }
 
+/* Nuke watermarks (like GO CLASSES) by removing background images inside the isolated block */
+.zen-isolated-element, .zen-isolated-element * {
+  background-image: none !important;
+}
+
 /* Reset button floating at the bottom right */
 #zen-snipper-reset {
   position: fixed !important;
