@@ -8,19 +8,23 @@ if (typeof window.zenIsActive === 'undefined') {
   function getCssPath(el) {
     if (!(el instanceof Element)) return '';
     let path = [];
-    while (el.nodeType === Node.ELEMENT_NODE) {
+    while (el.nodeType === Node.ELEMENT_NODE && el.tagName.toLowerCase() !== 'html') {
       let selector = el.nodeName.toLowerCase();
-      if (el.id && el.id !== 'zen-snipper-reset') {
-        selector += '#' + el.id;
+      
+      // Use the ID only if it doesn't contain numbers (stable IDs like "main", "content")
+      // This prevents issues with dynamic IDs (like "post-123") while keeping the path stable
+      if (el.id && el.id !== 'zen-snipper-reset' && !/\d/.test(el.id)) {
+        selector += '#' + CSS.escape(el.id);
         path.unshift(selector);
         break;
-      } else {
-        let sib = el, nth = 1;
-        while (sib = sib.previousElementSibling) {
-          if (sib.nodeName.toLowerCase() == selector) nth++;
-        }
-        if (nth != 1) selector += ":nth-of-type("+nth+")";
       }
+
+      let sib = el, nth = 1;
+      while (sib = sib.previousElementSibling) {
+        if (sib.nodeName.toLowerCase() == selector) nth++;
+      }
+      if (nth != 1) selector += ":nth-of-type("+nth+")";
+      
       path.unshift(selector);
       el = el.parentNode;
     }
@@ -110,23 +114,49 @@ if (typeof window.zenIsActive === 'undefined') {
 
   // Restore state on load (handles dynamic pages and extension injection timing)
   function tryRestoreZenMode() {
-    if (sessionStorage.getItem('zen_mode_url') === window.location.href) {
-      const selector = sessionStorage.getItem('zen_mode_selector');
-      if (selector) {
-        let attempts = 0;
-        let restoreInterval = setInterval(() => {
-          try {
-            const target = document.querySelector(selector);
-            if (target) {
+    console.log("[Zen Snipper] Extension script loaded on this page!");
+    
+    let savedUrl = localStorage.getItem('zen_mode_url');
+    if (!savedUrl) {
+      console.log("[Zen Snipper] No saved URL found. Normal load.");
+      return;
+    }
+
+    try {
+      let savedPath = new URL(savedUrl).pathname;
+      let currentPath = window.location.pathname;
+      
+      console.log("[Zen Snipper] Checking restore. Saved path:", savedPath, "Current:", currentPath);
+      
+      if (savedPath === currentPath) {
+        const selector = localStorage.getItem('zen_mode_selector');
+        console.log("[Zen Snipper] URL matched. Hunting for selector:", selector);
+        
+        if (selector) {
+          let attempts = 0;
+          let restoreInterval = setInterval(() => {
+            try {
+              const target = document.querySelector(selector);
+              if (target) {
+                console.log("[Zen Snipper] Element found! Restoring Zen Mode.");
+                clearInterval(restoreInterval);
+                isolateElement(target, true);
+              }
+            } catch (e) {
+              console.error("[Zen Snipper] Invalid selector:", e);
               clearInterval(restoreInterval);
-              isolateElement(target, true);
             }
-          } catch (e) {} // In case of weird selectors
-          
-          attempts++;
-          if (attempts > 15) clearInterval(restoreInterval); // Give up after ~7.5 seconds
-        }, 500);
+            
+            attempts++;
+            if (attempts > 15) {
+              console.log("[Zen Snipper] Gave up trying to find the element.");
+              clearInterval(restoreInterval); // Give up after ~7.5 seconds
+            }
+          }, 500);
+        }
       }
+    } catch(e) {
+      console.error("[Zen Snipper] Error parsing URL:", e);
     }
   }
 
@@ -241,8 +271,9 @@ if (typeof window.zenIsActive === 'undefined') {
     window.zenIsActive = true;
 
     if (!isRestoring) {
-      sessionStorage.setItem('zen_mode_url', window.location.href);
-      sessionStorage.setItem('zen_mode_selector', getCssPath(target));
+      localStorage.setItem('zen_mode_url', window.location.href);
+      localStorage.setItem('zen_mode_selector', getCssPath(target));
+      console.log("[Zen Snipper] Saved Zen Mode state to localStorage!");
     }
 
     let toHide = [];
@@ -363,8 +394,9 @@ if (typeof window.zenIsActive === 'undefined') {
     window.zenIsSelecting = false;
     stopSelectionEvents();
 
-    sessionStorage.removeItem('zen_mode_url');
-    sessionStorage.removeItem('zen_mode_selector');
+    localStorage.removeItem('zen_mode_url');
+    localStorage.removeItem('zen_mode_selector');
+    console.log("[Zen Snipper] Zen Mode exited. Cleared localStorage.");
 
     document.body.classList.remove('zen-snipper-active', 'zen-theme-dark', 'zen-theme-midnight', 'zen-theme-paper', 'zen-theme-hacker');
     
