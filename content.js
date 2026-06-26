@@ -5,6 +5,41 @@ if (typeof window.zenIsActive === 'undefined') {
   window.zenCurrentHover = null;
   window.zenDeletedStack = []; // Stack for undo functionality
 
+  function getCssPath(el) {
+    if (!(el instanceof Element)) return '';
+    let path = [];
+    while (el.nodeType === Node.ELEMENT_NODE) {
+      let selector = el.nodeName.toLowerCase();
+      if (el.id && el.id !== 'zen-snipper-reset') {
+        selector += '#' + el.id;
+        path.unshift(selector);
+        break;
+      } else {
+        let sib = el, nth = 1;
+        while (sib = sib.previousElementSibling) {
+          if (sib.nodeName.toLowerCase() == selector) nth++;
+        }
+        if (nth != 1) selector += ":nth-of-type("+nth+")";
+      }
+      path.unshift(selector);
+      el = el.parentNode;
+    }
+    return path.join(" > ");
+  }
+
+  // Restore state on load
+  window.addEventListener('load', () => {
+    if (sessionStorage.getItem('zen_mode_url') === window.location.href) {
+      const selector = sessionStorage.getItem('zen_mode_selector');
+      if (selector) {
+        const target = document.querySelector(selector);
+        if (target) {
+          isolateElement(target, true);
+        }
+      }
+    }
+  });
+
   document.addEventListener('mouseover', (e) => {
     window.zenCurrentHover = e.target;
   }, true);
@@ -105,9 +140,14 @@ if (typeof window.zenIsActive === 'undefined') {
     });
   }
 
-  function isolateElement(target) {
+  function isolateElement(target, isRestoring = false) {
     stopSelectionEvents();
     window.zenIsActive = true;
+
+    if (!isRestoring) {
+      sessionStorage.setItem('zen_mode_url', window.location.href);
+      sessionStorage.setItem('zen_mode_selector', getCssPath(target));
+    }
 
     let toHide = [];
     let current = target;
@@ -157,6 +197,9 @@ if (typeof window.zenIsActive === 'undefined') {
     window.zenIsActive = false;
     window.zenIsSelecting = false;
     stopSelectionEvents();
+
+    sessionStorage.removeItem('zen_mode_url');
+    sessionStorage.removeItem('zen_mode_selector');
 
     document.body.classList.remove('zen-snipper-active');
     
