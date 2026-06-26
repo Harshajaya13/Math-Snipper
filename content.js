@@ -3,25 +3,48 @@ if (typeof window.zenIsActive === 'undefined') {
   window.zenIsActive = false;
   window.zenIsSelecting = false;
   window.zenCurrentHover = null;
+  window.zenDeletedStack = []; // Stack for undo functionality
 
   document.addEventListener('mouseover', (e) => {
     window.zenCurrentHover = e.target;
   }, true);
 
+  // Prevent link clicks during Zen Mode
+  document.addEventListener('click', (e) => {
+    if (window.zenIsActive) {
+      let anchor = e.target.closest('a');
+      if (anchor) {
+        e.preventDefault(); // Stop the link from redirecting
+      }
+    }
+  }, true);
+
   document.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.isComposing) return;
 
+    // Exit on Q or Escape
     if (e.key.toLowerCase() === 'q' || e.key === 'Escape') {
       if (window.zenIsActive || window.zenIsSelecting) {
         resetZenMode();
       }
     }
 
+    // Undo the last deletion with Ctrl+Z or Cmd+Z
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && window.zenIsActive) {
+      if (window.zenDeletedStack.length > 0) {
+        let lastDeleted = window.zenDeletedStack.pop();
+        if (lastDeleted) lastDeleted.classList.remove('zen-hidden');
+      }
+      return; // prevent default browser undo behavior if any
+    }
+
+    // Delete hovered element with D or X
     if ((e.key.toLowerCase() === 'd' || e.key.toLowerCase() === 'x') && window.zenIsActive && window.zenCurrentHover) {
       if (window.zenCurrentHover !== document.body && 
           window.zenCurrentHover !== document.documentElement &&
           window.zenCurrentHover.id !== 'zen-snipper-reset') {
         window.zenCurrentHover.classList.add('zen-hidden');
+        window.zenDeletedStack.push(window.zenCurrentHover); // Save it to the stack
       }
     }
   }, true);

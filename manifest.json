@@ -13,8 +13,8 @@
   "commands": {
     "_execute_action": {
       "suggested_key": {
-        "default": "Alt+Z",
-        "mac": "Alt+Z"
+        "default": "Alt+M",
+        "mac": "Alt+M"
       },
       "description": "Activate Zen Snipper"
     }
