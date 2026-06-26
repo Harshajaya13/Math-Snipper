@@ -36,7 +36,9 @@ body.zen-snipper-active {
 }
 
 /* Nuke watermarks (like GO CLASSES) by removing background images inside the isolated block */
-.zen-isolated-element, .zen-isolated-element * {
+.zen-isolated-element, .zen-isolated-element *,
+.zen-isolated-element::before, .zen-isolated-element::after,
+.zen-isolated-element *::before, .zen-isolated-element *::after {
   background-image: none !important;
 }
 
