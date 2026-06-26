@@ -343,3 +343,62 @@ body.zen-theme-hacker #zen-scratchpad { background: rgba(0, 0, 0, 0.95) !importa
 body.zen-theme-hacker #zen-scratchpad-title { color: #0f0 !important; }
 body.zen-theme-hacker #zen-scratchpad-textarea { background: #050505 !important; color: #0f0 !important; border-color: #0f0 !important; }
 body.zen-theme-hacker #zen-scratchpad-preview { background: #050505 !important; color: #0f0 !important; border-color: #0f0 !important; }
+
+/* Shortcuts Modal */
+#zen-shortcuts-modal {
+  position: fixed !important;
+  top: 80px !important;
+  left: 30px !important;
+  transform: none !important;
+  background: rgba(30, 30, 36, 0.95) !important;
+  border-radius: 12px !important;
+  border: 1px solid #444 !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6) !important;
+  z-index: 9999999 !important;
+  padding: 20px !important;
+  width: 340px !important;
+  backdrop-filter: blur(10px) !important;
+  color: white !important;
+  font-family: sans-serif !important;
+}
+#zen-shortcuts-header {
+  font-size: 16px !important;
+  font-weight: bold !important;
+  margin-bottom: 16px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+#zen-shortcuts-close {
+  background: none !important;
+  border: none !important;
+  color: #888 !important;
+  font-size: 20px !important;
+  cursor: pointer !important;
+}
+#zen-shortcuts-close:hover { color: white !important; }
+#zen-shortcuts-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  font-size: 14px !important;
+}
+#zen-shortcuts-list div {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+  padding-bottom: 4px !important;
+}
+#zen-shortcuts-list div span:first-child {
+  font-family: monospace !important;
+  background: rgba(255,255,255,0.1) !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  color: #a78bfa !important;
+  font-weight: bold !important;
+}
+body.zen-theme-paper #zen-shortcuts-modal { background: rgba(255, 255, 255, 0.95) !important; color: #333 !important; border-color: #ccc !important; }
+body.zen-theme-paper #zen-shortcuts-list div { border-color: rgba(0,0,0,0.1) !important; }
+body.zen-theme-paper #zen-shortcuts-list div span:first-child { background: rgba(0,0,0,0.05) !important; color: #6d28d9 !important; }
+body.zen-theme-paper #zen-shortcuts-close:hover { color: #000 !important; }

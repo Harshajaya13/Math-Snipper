@@ -132,6 +132,7 @@ if (typeof window.zenIsActive === 'undefined') {
     btnContainer.style.gap = '8px';
 
     const previewBtn = document.createElement('button');
+    previewBtn.id = 'zen-scratchpad-preview-btn';
     previewBtn.innerText = '👁️ Preview';
     previewBtn.style.background = 'none';
     previewBtn.style.border = '1px solid currentColor';
@@ -366,6 +367,11 @@ if (typeof window.zenIsActive === 'undefined') {
 
     // Exit on Q or Escape
     if (e.key.toLowerCase() === 'q' || e.key === 'Escape') {
+      const modal = document.getElementById('zen-shortcuts-modal');
+      if (modal) {
+        modal.remove();
+        return; // Just close modal if it's open
+      }
       if (window.zenIsCopying) {
         document.querySelector('.zen-theme-option-copy').click(); // Toggle it off
         return; // Don't exit Zen mode yet, just exit copy mode
@@ -391,6 +397,17 @@ if (typeof window.zenIsActive === 'undefined') {
 
       if (e.key.toLowerCase() === 's') {
         toggleScratchpad();
+        return;
+      }
+
+      if (e.key.toLowerCase() === 'k') {
+        toggleShortcutsModal();
+        return;
+      }
+
+      if (e.key.toLowerCase() === 'p') {
+        const pBtn = document.getElementById('zen-scratchpad-preview-btn');
+        if (pBtn) pBtn.click();
         return;
       }
     }
@@ -629,6 +646,21 @@ if (typeof window.zenIsActive === 'undefined') {
     };
     menu.appendChild(optPad);
 
+    // Add Shortcuts Toggle
+    let optShortcuts = document.createElement('button');
+    optShortcuts.className = 'zen-theme-option';
+    optShortcuts.style.marginTop = '4px';
+    optShortcuts.style.borderTop = '1px solid #444';
+    optShortcuts.style.background = 'transparent';
+    optShortcuts.style.color = '#a78bfa';
+    optShortcuts.innerText = '⌨️ Keyboard Shortcuts';
+    optShortcuts.onclick = (e) => {
+      e.stopPropagation();
+      menu.classList.remove('zen-show');
+      toggleShortcutsModal();
+    };
+    menu.appendChild(optShortcuts);
+
     document.body.appendChild(menu);
 
     // Restore timer if it was active
@@ -687,11 +719,49 @@ if (typeof window.zenIsActive === 'undefined') {
     if (timer) timer.remove();
     const pad = document.getElementById('zen-scratchpad');
     if (pad) pad.remove();
+    const modal = document.getElementById('zen-shortcuts-modal');
+    if (modal) modal.remove();
     
     document.body.classList.remove('zen-scratchpad-open');
     
     if (zenTimerInterval) clearInterval(zenTimerInterval);
     zenTimerInterval = null;
+  }
+
+  // --- SHORTCUTS MODAL ---
+  function toggleShortcutsModal() {
+    let modal = document.getElementById('zen-shortcuts-modal');
+    if (modal) {
+      modal.remove();
+      return;
+    }
+    
+    modal = document.createElement('div');
+    modal.id = 'zen-shortcuts-modal';
+    
+    modal.innerHTML = `
+      <div id="zen-shortcuts-header">
+        ⌨️ Keyboard Shortcuts
+        <button id="zen-shortcuts-close">×</button>
+      </div>
+      <div id="zen-shortcuts-list">
+        <div><span>Alt + M</span><span>Start Snipper</span></div>
+        <div><span>Click</span><span>Isolate Block</span></div>
+        <div><span>M</span><span>Toggle Menu</span></div>
+        <div><span>T</span><span>Toggle Timer</span></div>
+        <div><span>S</span><span>Toggle Scratch Pad</span></div>
+        <div><span>P</span><span>Toggle Math Preview</span></div>
+        <div><span>K</span><span>Toggle Shortcuts</span></div>
+        <div><span>C</span><span>Toggle Copy Mode</span></div>
+        <div><span>Hover + C</span><span>Copy Block</span></div>
+        <div><span>Hover + D</span><span>Delete Block</span></div>
+        <div><span>Ctrl + Z</span><span>Undo Delete</span></div>
+        <div><span>Esc / Q</span><span>Exit Zen Mode</span></div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    document.getElementById('zen-shortcuts-close').onclick = () => modal.remove();
   }
 
   // --- SMART COPY LOGIC ---
