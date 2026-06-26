@@ -264,9 +264,9 @@ body.zen-theme-hacker .zen-isolated-element {
 #zen-scratchpad {
   position: fixed !important;
   top: 80px !important;
-  right: 30px !important;
-  width: 380px !important;
-  height: 65vh !important; /* Shorter! */
+  right: 20px !important;
+  width: 450px !important; /* Larger! */
+  height: 80vh !important; /* Larger! */
   background: rgba(30, 30, 36, 0.95) !important;
   border-radius: 12px !important;
   border: 1px solid #444 !important;
@@ -303,12 +303,20 @@ body.zen-theme-hacker .zen-isolated-element {
   border-radius: 8px !important;
   color: #ddd !important;
   padding: 12px !important;
-  font-family: monospace !important;
+  font-family: sans-serif !important; /* Changed to sans-serif for contenteditable */
   font-size: 15px !important;
-  resize: none !important;
   outline: none !important;
   line-height: 1.6 !important;
   box-shadow: inset 0 2px 5px rgba(0,0,0,0.2) !important;
+  overflow-y: auto !important;
+  white-space: pre-wrap !important;
+}
+
+#zen-scratchpad-textarea:empty:before {
+  content: attr(placeholder);
+  color: #888;
+  pointer-events: none;
+  display: block;
 }
 
 #zen-scratchpad-textarea:focus {
@@ -354,7 +362,7 @@ body.zen-theme-hacker #zen-scratchpad-preview { background: #050505 !important; 
 #zen-shortcuts-modal {
   position: fixed !important;
   top: 80px !important;
-  left: 30px !important;
+  left: 20px !important; /* Left most! */
   transform: none !important;
   background: rgba(30, 30, 36, 0.95) !important;
   border-radius: 12px !important;

@@ -156,9 +156,10 @@ if (typeof window.zenIsActive === 'undefined') {
     btnContainer.appendChild(clearBtn);
     titleDiv.appendChild(btnContainer);
 
-    const textarea = document.createElement('textarea');
+    const textarea = document.createElement('div');
     textarea.id = 'zen-scratchpad-textarea';
-    textarea.placeholder = 'Type calculations or paste LaTeX here...\n\n(Auto-saves automatically)';
+    textarea.contentEditable = 'true';
+    textarea.setAttribute('placeholder', 'Type calculations or paste LaTeX here...\n\n(Auto-saves automatically)');
     
     const previewDiv = document.createElement('div');
     previewDiv.id = 'zen-scratchpad-preview';
@@ -167,17 +168,17 @@ if (typeof window.zenIsActive === 'undefined') {
     // Restore saved notes
     const savedNotes = localStorage.getItem('zen_scratchpad_content');
     if (savedNotes) {
-      textarea.value = savedNotes;
+      textarea.innerHTML = savedNotes;
     }
     
     // Auto-save on type
     textarea.addEventListener('input', (e) => {
-      localStorage.setItem('zen_scratchpad_content', e.target.value);
+      localStorage.setItem('zen_scratchpad_content', e.target.innerHTML);
     });
 
     clearBtn.onclick = () => {
       if(confirm('Clear all notes?')) {
-        textarea.value = '';
+        textarea.innerHTML = '';
         localStorage.removeItem('zen_scratchpad_content');
         if (previewDiv.style.display === 'block') previewBtn.click(); // switch back to edit
       }
@@ -190,7 +191,7 @@ if (typeof window.zenIsActive === 'undefined') {
         previewDiv.style.display = 'block';
         previewBtn.innerText = '✏️ Edit';
         
-        let safeHTML = textarea.value.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        let safeHTML = textarea.innerHTML;
         previewDiv.innerHTML = safeHTML;
         
         // Inject script to render math using the host page's MathJax/KaTeX
