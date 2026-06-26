@@ -1,39 +1,59 @@
-# 🧘 Zen Math Snipper (Focus Mode)
+<div align="center">
+  <h1>🧘 Zen Focus Engine</h1>
+  <p><b>An ultra-lightweight, zero-bloat study environment for GATE & STEM students.</b></p>
+  
+  ![Version](https://img.shields.io/badge/version-2.0-blue.svg)
+  ![License](https://img.shields.io/badge/license-MIT-green.svg)
+  ![Manifest V3](https://img.shields.io/badge/Manifest-V3-purple.svg)
+</div>
 
-A blazing fast, ultra-lightweight browser extension designed to isolate and "snipe" GATE questions, study materials, or video players (Anime, YouTube) while removing all surrounding distractions. 
+<br/>
 
-Originally built to preserve complex math formatting (MathJax, KaTeX), it has evolved into a fully-fledged productivity and theater-mode tool featuring custom themes, study timers, and smart state persistence.
+## 🎯 The Vision
 
-## ✨ Features
-- **God-Mode Isolation**: Click any block to instantly hide everything else on the page.
-- **Math Formatting Preserved**: SVG/MathML rendering is left 100% perfectly intact by hiding siblings rather than copying text.
-- **🎨 Custom Material Themes**: Choose between 4 gorgeous hand-crafted UI themes (*OLED Dark, Midnight Blue, Paper Light, Hacker Matrix*). Your choice is saved automatically!
-- **⏱️ Focus Timer**: A sleek, glassmorphism Pomodoro-style timer built right into the extension for focused studying.
-- **📝 Floating Scratch Pad**: A slide-out notepad that auto-saves your calculations and notes without leaving the page.
-- **📋 Smart Copy Mode**: Extracts and cleans the raw LaTeX source code out of MathJax/KaTeX elements and copies it flawlessly to your clipboard (bypassing garbled HTML text).
-- **🧠 Smart State Restore**: If you accidentally press F5 to reload the page, Zen Mode will automatically lock back onto your isolated element! 
-- **💧 Watermark Annihilator**: Automatically strips background watermarks from your isolated reading blocks.
-- **Granular Eraser Tool**: Manually carve out annoying internal ads or buttons by hovering and hitting 'D'.
+Originally built to preserve complex math formatting (MathJax, KaTeX) while isolating GATE questions on crowded websites, **Zen Focus Engine** has evolved into a fully-fledged productivity tool. It transforms any chaotic webpage into a pristine, beautifully themed study environment in a single click.
 
-## ⌨️ Shortcuts & Controls
+No bloat. No tracking. Pure focus.
 
-All shortcuts are available **only while Zen Mode is active**, ensuring they never interfere with regular browsing.
+<br/>
+
+## ✨ Key Features
+
+* 🥷 **God-Mode Isolation:** Click any block to instantly hide everything else on the page. SVG/MathML math rendering is left 100% perfectly intact.
+* 📝 **Rich-Text Scratch Pad:** A resizable, auto-saving `contenteditable` notepad. Paste rendered MathJax directly into it!
+* 👁️ **Native MathJax Bridge:** Press **P** to secretly hijack the website's native Math engine, turning your raw LaTeX notes into beautifully rendered equations right inside the Scratch Pad.
+* 🎨 **Material Glassmorphism Themes:** Choose between 4 gorgeous hand-crafted UI themes (*OLED Dark, Midnight Blue, Paper Light, Hacker Matrix*).
+* 🧲 **Magnetic HUD Windows:** The Scratch Pad and Shortcuts modal are fully draggable windows. Just grab their headers and throw them anywhere!
+* 🧠 **Smart State Restore:** If you accidentally press F5 to reload the page, Zen Mode will automatically lock back onto your isolated element (bypassing randomized React IDs).
+* 💧 **Watermark Annihilator:** Automatically strips background watermarks from isolated reading blocks.
+* 📋 **Smart Copy Mode:** Extracts and cleans the raw LaTeX source code out of MathJax elements and copies it flawlessly to your clipboard.
+
+<br/>
+
+## ⌨️ The HUD Controls
+
+All shortcuts are strictly sandboxed. They are **only** available while Zen Mode is active, ensuring they never interfere with your regular browsing.
 
 | Action | Shortcut / Input | Description |
-|--------|----------|-------------|
+|--------|------------------|-------------|
 | **Start Snipper** | `Alt + M` | Activates hover mode. Move your mouse to highlight blocks to isolate. |
-| **Isolate Block** | `Left-Click` | Snipes the highlighted block, transforming it into a premium card and hiding the rest of the site. |
+| **Isolate Block** | `Left-Click` | Snipes the highlighted block, transforming it into a premium card. |
+| **Ultra-Focus Mode** | `Tab` | Instantly hides the entire HUD (Timer, Menus, Modals) so nothing is visible except the question. |
 | **Theme Menu** | `M` | Toggles the Theme & Settings Palette open or closed. |
 | **Focus Timer** | `T` | Toggles the 25-minute Pomodoro Timer. |
 | **Scratch Pad** | `S` | Toggles the auto-saving Floating Scratch Pad. |
-| **Copy Mode** | `C` | Toggles **Smart Copy Mode** ON/OFF. While ON, hover over any block and press `C` again to instantly extract its raw text & LaTeX to your clipboard. |
-| **Eraser Tool** | `Hover + D` (or `X`) | Hover over any annoying sub-element and press `D` to instantly delete it. |
+| **Math Preview** | `P` | Toggles the Scratch Pad between Edit Mode and MathJax Preview Mode. |
+| **Shortcuts HUD**| `K` | Toggles this Keyboard Shortcuts cheat sheet open or closed. |
+| **Copy Mode** | `C` | Toggles **Smart Copy Mode** ON/OFF. While ON, hover over any block and press `C` to copy its LaTeX. |
+| **Eraser Tool** | `Hover + D` | Hover over any annoying sub-element (ads/buttons) and press `D` to instantly delete it. |
 | **Undo Deletion** | `Ctrl + Z` | Reverts your last Eraser Tool deletion. |
-| **Exit Zen Mode** | `Q` (or `Esc`) | Instantly returns the page to normal (or exits Copy Mode if it is currently active). |
+| **Exit Zen Mode**| `Q` (or `Esc`) | Returns the page to normal (or exits Copy Mode if it is currently active). |
+
+<br/>
 
 ## 🚀 Installation Guide
 
-### 1️⃣ Zen Browser & Firefox (Primary)
+### 1️⃣ Zen Browser & Firefox (Recommended)
 Our extension uses strict, modern **Manifest V3** security rules. 
 
 1. Type `about:debugging#/runtime/this-firefox` into your URL bar.
@@ -46,14 +66,15 @@ Our extension uses strict, modern **Manifest V3** security rules.
    - Go to the **Permissions** tab.
    - Toggle **"Access your data for all websites"** to **ON**.
 
-### 3️⃣ Google Chrome / Brave / Edge
+### 2️⃣ Google Chrome / Brave / Edge
 1. Navigate to your browser's extension dashboard (e.g. `chrome://extensions/`).
 2. Toggle **"Developer mode"** ON.
 3. Click the **"Load unpacked"** button.
 4. Select the entire `zen-extension` folder.
-*(Note: Since Chromium browsers use Service Workers instead of background scripts, you may need to open `manifest.json` and change `"scripts": ["background.js"]` to `"service_worker": "background.js"`).*
 
-### 4️⃣ Apple Safari
+*(Note: Since Chromium browsers use Service Workers instead of background scripts, you may need to open `manifest.json` and change `"scripts": ["background.js"]` to `"service_worker": "background.js"` if you experience background script errors).*
+
+### 3️⃣ Apple Safari
 Because Safari uses native macOS app packaging for extensions:
 1. Open your terminal and run Apple's command-line converter:
    `xcrun safari-web-extension-converter /path/to/zen-extension`
@@ -61,5 +82,9 @@ Because Safari uses native macOS app packaging for extensions:
 3. Build and run the project to register the extension.
 4. Go to **Safari Preferences > Extensions** and enable it!
 
+<br/>
+
 ---
-*Coded for absolute focus.* 🥷
+<div align="center">
+  <i>Coded for absolute focus.</i> 🥷
+</div>
