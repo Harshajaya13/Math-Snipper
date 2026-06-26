@@ -7,11 +7,42 @@
   transition: all 0.2s ease !important;
 }
 
-/* When the page is in Zen Mode, we apply a beautiful dark theme to the remaining empty space */
+/* Base Zen Mode Body */
 body.zen-snipper-active {
-  background: #121212 !important; /* Beautiful dark background */
-  background-image: radial-gradient(circle at 50% 0%, #2a2a35 0%, #121212 70%) !important;
   color: #e0e0e0 !important;
+}
+
+/* --- THEMES --- */
+body.zen-theme-dark {
+  background: #121212 !important;
+  background-image: radial-gradient(circle at 50% 0%, #2a2a35 0%, #121212 70%) !important;
+}
+
+body.zen-theme-midnight {
+  background: #0f172a !important; 
+  background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 70%) !important;
+}
+
+body.zen-theme-paper {
+  background: #f8f9fa !important;
+  color: #333 !important;
+}
+body.zen-theme-paper .zen-isolated-element {
+  background: #ffffff !important;
+  color: #222 !important;
+  border: 1px solid #e5e5e5 !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.08) !important;
+}
+
+body.zen-theme-hacker {
+  background: #000000 !important;
+  color: #00ff00 !important;
+}
+body.zen-theme-hacker .zen-isolated-element {
+  background: #050505 !important;
+  border: 1px solid #00ff00 !important;
+  box-shadow: 0 0 20px rgba(0,255,0,0.1) !important;
+  color: #00ff00 !important;
 }
 
 /* Hide everything we tagged as hidden */
@@ -52,7 +83,7 @@ body.zen-snipper-active {
 #zen-snipper-reset {
   position: fixed !important;
   bottom: 30px !important;
-  right: 30px !important;
+  right: 90px !important; /* Shifted left to fit palette */
   padding: 12px 24px !important;
   background: #8b5cf6 !important;
   color: white !important;
@@ -60,12 +91,129 @@ body.zen-snipper-active {
   border-radius: 8px !important;
   font-size: 16px !important;
   font-family: sans-serif !important;
+  font-weight: bold !important;
   cursor: pointer !important;
   z-index: 9999999 !important;
   box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4) !important;
-  transition: transform 0.2s !important;
+  transition: transform 0.2s, background 0.2s !important;
 }
 
 #zen-snipper-reset:hover {
   transform: scale(1.05) !important;
+  background: #7c3aed !important;
+}
+
+/* Theme Button */
+#zen-theme-btn {
+  position: fixed !important;
+  bottom: 30px !important;
+  right: 30px !important; /* Furthest right */
+  width: 45px !important;
+  height: 45px !important;
+  background: #2a2a35 !important;
+  color: white !important;
+  border: 1px solid #444 !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  z-index: 9999999 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
+  transition: transform 0.2s, background 0.2s !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#zen-theme-btn:hover {
+  transform: scale(1.1) !important;
+  background: #3f3f4e !important;
+}
+
+/* Theme Menu */
+#zen-theme-menu {
+  position: fixed !important;
+  bottom: 85px !important;
+  right: 30px !important;
+  background: #1e1e24 !important;
+  border: 1px solid #333 !important;
+  border-radius: 12px !important;
+  padding: 8px !important;
+  z-index: 9999999 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(10px) !important;
+  transition: all 0.2s ease !important;
+}
+
+#zen-theme-menu.zen-show {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: translateY(0) !important;
+}
+
+/* Theme Options */
+.zen-theme-option {
+  padding: 10px 16px !important;
+  border-radius: 8px !important;
+  border: none !important;
+  cursor: pointer !important;
+  font-family: sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  transition: transform 0.1s !important;
+  text-align: left !important;
+}
+.zen-theme-option:hover {
+  transform: scale(1.02) !important;
+}
+
+.zen-theme-option-dark { background: #2a2a35 !important; color: white !important; }
+.zen-theme-option-midnight { background: #1e293b !important; color: #94a3b8 !important; border: 1px solid #334155 !important;}
+.zen-theme-option-paper { background: #fdfbf7 !important; color: #333 !important; border: 1px solid #ddd !important;}
+.zen-theme-option-hacker { background: #000000 !important; color: #00ff00 !important; border: 1px solid #00ff00 !important; }
+
+/* Focus Timer */
+#zen-focus-timer {
+  position: fixed !important;
+  top: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  background: rgba(30, 30, 36, 0.9) !important;
+  color: white !important;
+  padding: 10px 24px !important;
+  border-radius: 30px !important;
+  font-size: 24px !important;
+  font-family: monospace !important;
+  font-weight: bold !important;
+  z-index: 9999999 !important;
+  border: 1px solid #444 !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  backdrop-filter: blur(5px) !important;
+}
+.zen-timer-controls {
+  display: flex !important;
+  gap: 8px !important;
+}
+.zen-timer-controls button {
+  background: #444 !important;
+  border: none !important;
+  color: white !important;
+  border-radius: 50% !important;
+  width: 28px !important;
+  height: 28px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background 0.2s !important;
+}
+.zen-timer-controls button:hover {
+  background: #8b5cf6 !important;
 }

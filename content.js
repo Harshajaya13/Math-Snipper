@@ -27,6 +27,87 @@ if (typeof window.zenIsActive === 'undefined') {
     return path.join(" > ");
   }
 
+  // Timer variables
+  let zenTimerInterval = null;
+  let zenTimeLeft = 25 * 60; // 25 mins default
+
+  function createTimerUI() {
+    if (document.getElementById('zen-focus-timer')) return;
+    
+    const timerDiv = document.createElement('div');
+    timerDiv.id = 'zen-focus-timer';
+    
+    const timeDisplay = document.createElement('span');
+    timeDisplay.id = 'zen-timer-display';
+    timeDisplay.innerText = '25:00';
+    
+    const playBtn = document.createElement('button');
+    playBtn.innerText = '▶';
+    playBtn.title = 'Start/Pause';
+    playBtn.onclick = () => {
+      if (zenTimerInterval) {
+        clearInterval(zenTimerInterval);
+        zenTimerInterval = null;
+        playBtn.innerText = '▶';
+      } else {
+        playBtn.innerText = '⏸';
+        zenTimerInterval = setInterval(() => {
+          if (zenTimeLeft > 0) {
+            zenTimeLeft--;
+            let m = Math.floor(zenTimeLeft / 60).toString().padStart(2, '0');
+            let s = (zenTimeLeft % 60).toString().padStart(2, '0');
+            timeDisplay.innerText = `${m}:${s}`;
+          }
+        }, 1000);
+      }
+    };
+
+    const resetBtn = document.createElement('button');
+    resetBtn.innerText = '↻';
+    resetBtn.title = 'Reset';
+    resetBtn.onclick = () => {
+      zenTimeLeft = 25 * 60;
+      timeDisplay.innerText = '25:00';
+      if (zenTimerInterval) clearInterval(zenTimerInterval);
+      zenTimerInterval = null;
+      playBtn.innerText = '▶';
+    };
+
+    const controls = document.createElement('div');
+    controls.className = 'zen-timer-controls';
+    controls.appendChild(playBtn);
+    controls.appendChild(resetBtn);
+
+    timerDiv.appendChild(timeDisplay);
+    timerDiv.appendChild(controls);
+    document.body.appendChild(timerDiv);
+  }
+
+  function toggleTimer() {
+    let timerEl = document.getElementById('zen-focus-timer');
+    if (!timerEl) {
+      createTimerUI();
+      localStorage.setItem('zen_timer_active', 'true');
+    } else {
+      timerEl.remove();
+      if (zenTimerInterval) clearInterval(zenTimerInterval);
+      zenTimerInterval = null;
+      zenTimeLeft = 25 * 60;
+      localStorage.setItem('zen_timer_active', 'false');
+    }
+  }
+
+  // Theme persistence functions
+  function applyTheme(themeName) {
+    document.body.classList.remove('zen-theme-dark', 'zen-theme-midnight', 'zen-theme-paper', 'zen-theme-hacker');
+    document.body.classList.add('zen-theme-' + themeName);
+    localStorage.setItem('zen_saved_theme', themeName);
+  }
+
+  function getSavedTheme() {
+    return localStorage.getItem('zen_saved_theme') || 'dark';
+  }
+
   // Restore state on load
   window.addEventListener('load', () => {
     if (sessionStorage.getItem('zen_mode_url') === window.location.href) {
@@ -180,18 +261,86 @@ if (typeof window.zenIsActive === 'undefined') {
 
     // Style the body and the target
     document.body.classList.add('zen-snipper-active');
+    applyTheme(getSavedTheme());
     target.classList.add('zen-isolated-element');
 
-    createResetButton();
+    createControls();
   }
 
-  function createResetButton() {
+  function createControls() {
     if (document.getElementById('zen-snipper-reset')) return;
+    
+    // Reset Button
     const btn = document.createElement('button');
     btn.id = 'zen-snipper-reset';
     btn.innerText = 'Exit Zen Mode';
     btn.onclick = resetZenMode;
     document.body.appendChild(btn);
+
+    // Theme Button (Palette Icon)
+    const themeBtn = document.createElement('button');
+    themeBtn.id = 'zen-theme-btn';
+    themeBtn.title = 'Change Theme';
+    themeBtn.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>`;
+    document.body.appendChild(themeBtn);
+
+    // Theme Selection Menu
+    const menu = document.createElement('div');
+    menu.id = 'zen-theme-menu';
+    
+    const themes = [
+      { id: 'dark', label: 'OLED Dark' },
+      { id: 'midnight', label: 'Midnight Blue' },
+      { id: 'paper', label: 'Paper Light' },
+      { id: 'hacker', label: 'Hacker Matrix' }
+    ];
+
+    themes.forEach(t => {
+      let opt = document.createElement('button');
+      opt.className = 'zen-theme-option zen-theme-option-' + t.id;
+      opt.innerText = t.label;
+      opt.onclick = (e) => {
+        e.stopPropagation();
+        applyTheme(t.id);
+        menu.classList.remove('zen-show');
+      };
+      menu.appendChild(opt);
+    });
+
+    // Add Timer Toggle
+    let optTimer = document.createElement('button');
+    optTimer.className = 'zen-theme-option';
+    optTimer.style.marginTop = '4px';
+    optTimer.style.borderTop = '1px solid #444';
+    optTimer.style.background = 'transparent';
+    optTimer.style.color = 'white';
+    optTimer.innerText = '⏱️ Toggle Study Timer';
+    optTimer.onclick = (e) => {
+      e.stopPropagation();
+      toggleTimer();
+      menu.classList.remove('zen-show');
+    };
+    menu.appendChild(optTimer);
+
+    document.body.appendChild(menu);
+
+    // Restore timer if it was active
+    if (localStorage.getItem('zen_timer_active') === 'true') {
+      createTimerUI();
+    }
+
+    // Toggle menu
+    themeBtn.onclick = (e) => {
+      e.stopPropagation();
+      menu.classList.toggle('zen-show');
+    };
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function closeMenu(e) {
+      if (window.zenIsActive && menu.classList.contains('zen-show') && !menu.contains(e.target) && e.target !== themeBtn) {
+        menu.classList.remove('zen-show');
+      }
+    });
   }
 
   function resetZenMode() {
@@ -202,7 +351,7 @@ if (typeof window.zenIsActive === 'undefined') {
     sessionStorage.removeItem('zen_mode_url');
     sessionStorage.removeItem('zen_mode_selector');
 
-    document.body.classList.remove('zen-snipper-active');
+    document.body.classList.remove('zen-snipper-active', 'zen-theme-dark', 'zen-theme-midnight', 'zen-theme-paper', 'zen-theme-hacker');
     
     const hiddenElements = document.querySelectorAll('.zen-hidden');
     hiddenElements.forEach(el => el.classList.remove('zen-hidden'));
@@ -215,5 +364,13 @@ if (typeof window.zenIsActive === 'undefined') {
 
     const btn = document.getElementById('zen-snipper-reset');
     if (btn) btn.remove();
+    const themeBtn = document.getElementById('zen-theme-btn');
+    if (themeBtn) themeBtn.remove();
+    const menu = document.getElementById('zen-theme-menu');
+    if (menu) menu.remove();
+    const timer = document.getElementById('zen-focus-timer');
+    if (timer) timer.remove();
+    if (zenTimerInterval) clearInterval(zenTimerInterval);
+    zenTimerInterval = null;
   }
 }
