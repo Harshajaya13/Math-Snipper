@@ -108,18 +108,33 @@ if (typeof window.zenIsActive === 'undefined') {
     return localStorage.getItem('zen_saved_theme') || 'dark';
   }
 
-  // Restore state on load
-  window.addEventListener('load', () => {
+  // Restore state on load (handles dynamic pages and extension injection timing)
+  function tryRestoreZenMode() {
     if (sessionStorage.getItem('zen_mode_url') === window.location.href) {
       const selector = sessionStorage.getItem('zen_mode_selector');
       if (selector) {
-        const target = document.querySelector(selector);
-        if (target) {
-          isolateElement(target, true);
-        }
+        let attempts = 0;
+        let restoreInterval = setInterval(() => {
+          try {
+            const target = document.querySelector(selector);
+            if (target) {
+              clearInterval(restoreInterval);
+              isolateElement(target, true);
+            }
+          } catch (e) {} // In case of weird selectors
+          
+          attempts++;
+          if (attempts > 15) clearInterval(restoreInterval); // Give up after ~7.5 seconds
+        }, 500);
       }
     }
-  });
+  }
+
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    tryRestoreZenMode();
+  } else {
+    window.addEventListener('load', tryRestoreZenMode);
+  }
 
   document.addEventListener('mouseover', (e) => {
     window.zenCurrentHover = e.target;
