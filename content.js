@@ -284,31 +284,47 @@ if (typeof window.zenIsActive === 'undefined') {
   document.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.isComposing) return;
 
+    // Undo the last deletion with Ctrl+Z or Cmd+Z
+    if (e.ctrlKey || e.metaKey) {
+      if (e.key.toLowerCase() === 'z' && window.zenIsActive) {
+        if (window.zenDeletedStack.length > 0) {
+          let lastDeleted = window.zenDeletedStack.pop();
+          if (lastDeleted) lastDeleted.classList.remove('zen-hidden');
+        }
+        e.preventDefault(); // prevent default browser undo behavior
+      }
+      return; // Ignore other ctrl/cmd shortcuts
+    }
+
     // Exit on Q or Escape
     if (e.key.toLowerCase() === 'q' || e.key === 'Escape') {
       if (window.zenIsCopying) {
-        window.zenIsCopying = false;
-        const optCopy = document.querySelector('.zen-theme-option-copy');
-        if (optCopy) {
-            optCopy.innerText = '📋 Copy Smart Text (LaTeX)';
-            optCopy.style.color = '#38bdf8';
-        }
-        showToast("Exited Copy Mode");
-        document.querySelectorAll('.zen-copy-hover').forEach(el => el.classList.remove('zen-copy-hover'));
+        document.querySelector('.zen-theme-option-copy').click(); // Toggle it off
         return; // Don't exit Zen mode yet, just exit copy mode
       }
       if (window.zenIsActive || window.zenIsSelecting) {
         resetZenMode();
       }
+      return;
     }
 
-    // Undo the last deletion with Ctrl+Z or Cmd+Z
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && window.zenIsActive) {
-      if (window.zenDeletedStack.length > 0) {
-        let lastDeleted = window.zenDeletedStack.pop();
-        if (lastDeleted) lastDeleted.classList.remove('zen-hidden');
+    // Quick Toggles in Zen Mode
+    if (window.zenIsActive) {
+      if (e.key.toLowerCase() === 'm') {
+        const themeBtn = document.getElementById('zen-theme-btn');
+        if (themeBtn) themeBtn.click();
+        return;
       }
-      return; // prevent default browser undo behavior if any
+      
+      if (e.key.toLowerCase() === 't') {
+        toggleTimer();
+        return;
+      }
+
+      if (e.key.toLowerCase() === 's') {
+        toggleScratchpad();
+        return;
+      }
     }
 
     // Delete hovered element with D or X (Only if NOT copying)
@@ -321,21 +337,30 @@ if (typeof window.zenIsActive === 'undefined') {
       }
     }
 
-    // Copy hovered element with C (Only if COPYING)
-    if (window.zenIsCopying && e.key.toLowerCase() === 'c' && window.zenIsActive && window.zenCurrentHover) {
-      if (window.zenCurrentHover !== document.body && 
-          window.zenCurrentHover !== document.documentElement &&
-          window.zenCurrentHover.id !== 'zen-snipper-reset') {
-        
-        copySmartElement(window.zenCurrentHover);
-        
-        // Visual feedback flash
-        const oldBg = window.zenCurrentHover.style.backgroundColor;
-        window.zenCurrentHover.style.backgroundColor = 'rgba(74, 222, 128, 0.4)';
-        showToast("✅ Copied block to clipboard!", 2000);
-        setTimeout(() => {
-          window.zenCurrentHover.style.backgroundColor = oldBg;
-        }, 300);
+    // Handle C for Copy Mode
+    if (e.key.toLowerCase() === 'c' && window.zenIsActive) {
+      if (window.zenIsCopying) {
+        // In copy mode, if hovering over a valid block, copy it!
+        if (window.zenCurrentHover && window.zenCurrentHover !== document.body && 
+            window.zenCurrentHover !== document.documentElement &&
+            window.zenCurrentHover.id !== 'zen-snipper-reset') {
+          
+          copySmartElement(window.zenCurrentHover);
+          
+          // Visual feedback flash
+          const oldBg = window.zenCurrentHover.style.backgroundColor;
+          window.zenCurrentHover.style.backgroundColor = 'rgba(74, 222, 128, 0.4)';
+          showToast("✅ Copied block to clipboard!", 2000);
+          setTimeout(() => {
+            window.zenCurrentHover.style.backgroundColor = oldBg;
+          }, 300);
+        } else {
+          // If they press C but aren't hovering over anything, toggle copy mode OFF
+          document.querySelector('.zen-theme-option-copy').click();
+        }
+      } else {
+        // Toggle copy mode ON
+        document.querySelector('.zen-theme-option-copy').click();
       }
     }
   }, true);

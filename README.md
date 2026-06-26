@@ -6,23 +6,30 @@ Originally built to preserve complex math formatting (MathJax, KaTeX), it has ev
 
 ## ✨ Features
 - **God-Mode Isolation**: Click any block to instantly hide everything else on the page.
-- **Math Formatting Preserved**: Unlike text-copiers, this manipulates the DOM to hide siblings, meaning SVG/MathML math rendering is left 100% perfectly intact.
-- **🎨 Custom Material Themes**: Choose between 4 gorgeous hand-crafted UI themes: *OLED Dark, Midnight Blue, Paper Light,* and *Hacker Matrix*. Your choice is saved automatically!
+- **Math Formatting Preserved**: SVG/MathML rendering is left 100% perfectly intact by hiding siblings rather than copying text.
+- **🎨 Custom Material Themes**: Choose between 4 gorgeous hand-crafted UI themes (*OLED Dark, Midnight Blue, Paper Light, Hacker Matrix*). Your choice is saved automatically!
 - **⏱️ Focus Timer**: A sleek, glassmorphism Pomodoro-style timer built right into the extension for focused studying.
-- **🧠 Smart State Restore**: If you accidentally press F5 to reload the page, Zen Mode will automatically lock back onto your isolated element! (It even dynamically bypasses randomized Video Player IDs to find your content).
-- **💧 Watermark Annihilator**: Automatically strips background watermarks (including pseudo-elements) from your isolated reading blocks.
-- **Granular Eraser Tool**: Manually carve out annoying internal ads, buttons, or images by hovering and hitting a key.
-- **Link Disabler**: All anchor `<a>` tags become unclickable while in Zen Mode, letting you easily highlight text without accidental redirects.
+- **📝 Floating Scratch Pad**: A slide-out notepad that auto-saves your calculations and notes without leaving the page.
+- **📋 Smart Copy Mode**: Extracts and cleans the raw LaTeX source code out of MathJax/KaTeX elements and copies it flawlessly to your clipboard (bypassing garbled HTML text).
+- **🧠 Smart State Restore**: If you accidentally press F5 to reload the page, Zen Mode will automatically lock back onto your isolated element! 
+- **💧 Watermark Annihilator**: Automatically strips background watermarks from your isolated reading blocks.
+- **Granular Eraser Tool**: Manually carve out annoying internal ads or buttons by hovering and hitting 'D'.
 
 ## ⌨️ Shortcuts & Controls
 
+All shortcuts are available **only while Zen Mode is active**, ensuring they never interfere with regular browsing.
+
 | Action | Shortcut / Input | Description |
 |--------|----------|-------------|
-| **Start Snipper** | `Alt + M` | Activates hover mode. Move your mouse to highlight blocks. |
+| **Start Snipper** | `Alt + M` | Activates hover mode. Move your mouse to highlight blocks to isolate. |
 | **Isolate Block** | `Left-Click` | Snipes the highlighted block, transforming it into a premium card and hiding the rest of the site. |
-| **Eraser Tool** | `Hover + D` (or `X`) | While in Zen Mode, hover over any annoying sub-element and press `D` to instantly delete it. |
+| **Theme Menu** | `M` | Toggles the Theme & Settings Palette open or closed. |
+| **Focus Timer** | `T` | Toggles the 25-minute Pomodoro Timer. |
+| **Scratch Pad** | `S` | Toggles the auto-saving Floating Scratch Pad. |
+| **Copy Mode** | `C` | Toggles **Smart Copy Mode** ON/OFF. While ON, hover over any block and press `C` again to instantly extract its raw text & LaTeX to your clipboard. |
+| **Eraser Tool** | `Hover + D` (or `X`) | Hover over any annoying sub-element and press `D` to instantly delete it. |
 | **Undo Deletion** | `Ctrl + Z` | Reverts your last Eraser Tool deletion. |
-| **Exit Zen Mode** | `Q` (or `Esc`) | Instantly returns the page to normal. |
+| **Exit Zen Mode** | `Q` (or `Esc`) | Instantly returns the page to normal (or exits Copy Mode if it is currently active). |
 
 ## 🚀 Installation Guide
 
