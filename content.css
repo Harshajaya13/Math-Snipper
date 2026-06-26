@@ -123,7 +123,7 @@ body.zen-theme-hacker .zen-isolated-element {
 #zen-snipper-reset {
   position: fixed !important;
   bottom: 30px !important;
-  right: 90px !important; /* Shifted left to fit palette */
+  right: 90px !important;
   padding: 12px 24px !important;
   background: #8b5cf6 !important;
   color: white !important;
@@ -135,12 +135,14 @@ body.zen-theme-hacker .zen-isolated-element {
   cursor: pointer !important;
   z-index: 9999999 !important;
   box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4) !important;
-  transition: transform 0.2s, background 0.2s !important;
+  opacity: 0.25 !important; /* Low opacity to prevent distraction */
+  transition: all 0.3s ease !important;
 }
 
 #zen-snipper-reset:hover {
   transform: scale(1.05) !important;
   background: #7c3aed !important;
+  opacity: 1 !important;
 }
 
 /* Theme Button */
@@ -264,7 +266,7 @@ body.zen-theme-hacker .zen-isolated-element {
   top: 80px !important;
   right: 30px !important;
   width: 380px !important;
-  height: calc(100vh - 180px) !important;
+  height: 65vh !important; /* Shorter! */
   background: rgba(30, 30, 36, 0.95) !important;
   border-radius: 12px !important;
   border: 1px solid #444 !important;
@@ -274,7 +276,11 @@ body.zen-theme-hacker .zen-isolated-element {
   flex-direction: column !important;
   padding: 16px !important;
   backdrop-filter: blur(10px) !important;
-  transition: all 0.3s ease !important;
+  transition: opacity 0.3s ease, transform 0.3s ease !important;
+  resize: both !important;
+  overflow: hidden !important;
+  min-width: 250px !important;
+  min-height: 200px !important;
 }
 
 #zen-scratchpad-title {
@@ -402,3 +408,14 @@ body.zen-theme-paper #zen-shortcuts-modal { background: rgba(255, 255, 255, 0.95
 body.zen-theme-paper #zen-shortcuts-list div { border-color: rgba(0,0,0,0.1) !important; }
 body.zen-theme-paper #zen-shortcuts-list div span:first-child { background: rgba(0,0,0,0.05) !important; color: #6d28d9 !important; }
 body.zen-theme-paper #zen-shortcuts-close:hover { color: #000 !important; }
+
+/* Ultra Focus Mode (Tab Key) */
+body.zen-ultra-focus #zen-scratchpad,
+body.zen-ultra-focus #zen-shortcuts-modal,
+body.zen-ultra-focus #zen-snipper-reset,
+body.zen-ultra-focus #zen-theme-btn,
+body.zen-ultra-focus #zen-theme-menu,
+body.zen-ultra-focus #zen-focus-timer {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}

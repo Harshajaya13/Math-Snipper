@@ -384,6 +384,12 @@ if (typeof window.zenIsActive === 'undefined') {
 
     // Quick Toggles in Zen Mode
     if (window.zenIsActive) {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        document.body.classList.toggle('zen-ultra-focus');
+        return;
+      }
+
       if (e.key.toLowerCase() === 'm') {
         const themeBtn = document.getElementById('zen-theme-btn');
         if (themeBtn) themeBtn.click();
@@ -745,6 +751,7 @@ if (typeof window.zenIsActive === 'undefined') {
         <button id="zen-shortcuts-close">×</button>
       </div>
       <div id="zen-shortcuts-list">
+        <div><span>Tab</span><span>Ultra-Focus Mode</span></div>
         <div><span>Alt + M</span><span>Start Snipper</span></div>
         <div><span>Click</span><span>Isolate Block</span></div>
         <div><span>M</span><span>Toggle Menu</span></div>
