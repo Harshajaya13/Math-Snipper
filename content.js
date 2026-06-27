@@ -3,7 +3,7 @@ if (typeof window.zenIsActive === 'undefined') {
   window.zenIsActive = false;
   window.zenIsSelecting = false;
   window.zenCurrentHover = null;
-  window.zenDeletedStack = []; 
+  window.zenDeletedStack = [];
   window.zenRedoStack = []; // Redo stack
   window.zenIsCopying = false;
   window.zenTargetToIsolate = null; // Used for mobile selection
@@ -27,7 +27,7 @@ if (typeof window.zenIsActive === 'undefined') {
     let path = [];
     while (el.nodeType === Node.ELEMENT_NODE && el.tagName.toLowerCase() !== 'html') {
       let selector = el.nodeName.toLowerCase();
-      
+
       // Use the ID only if it doesn't contain numbers (stable IDs like "main", "content")
       // This prevents issues with dynamic IDs (like "post-123") while keeping the path stable
       if (el.id && el.id !== 'zen-snipper-reset' && !/\d/.test(el.id)) {
@@ -40,8 +40,8 @@ if (typeof window.zenIsActive === 'undefined') {
       while (sib = sib.previousElementSibling) {
         if (sib.nodeName.toLowerCase() == selector) nth++;
       }
-      if (nth != 1) selector += ":nth-of-type("+nth+")";
-      
+      if (nth != 1) selector += ":nth-of-type(" + nth + ")";
+
       path.unshift(selector);
       el = el.parentNode;
     }
@@ -54,14 +54,14 @@ if (typeof window.zenIsActive === 'undefined') {
 
   function createTimerUI() {
     if (document.getElementById('zen-focus-timer')) return;
-    
+
     const timerDiv = document.createElement('div');
     timerDiv.id = 'zen-focus-timer';
-    
+
     const timeDisplay = document.createElement('span');
     timeDisplay.id = 'zen-timer-display';
     timeDisplay.innerText = '25:00';
-    
+
     const playBtn = document.createElement('button');
     playBtn.innerText = '▶';
     playBtn.title = 'Start/Pause';
@@ -121,14 +121,14 @@ if (typeof window.zenIsActive === 'undefined') {
   // Scratchpad Logic
   function createScratchpadUI() {
     if (document.getElementById('zen-scratchpad')) return;
-    
+
     const padDiv = document.createElement('div');
     padDiv.id = 'zen-scratchpad';
-    
+
     const titleDiv = document.createElement('div');
     titleDiv.id = 'zen-scratchpad-title';
     titleDiv.innerHTML = '<span>📝 Scratch Pad</span>';
-    
+
     const btnContainer = document.createElement('div');
     btnContainer.style.display = 'flex';
     btnContainer.style.gap = '8px';
@@ -143,7 +143,7 @@ if (typeof window.zenIsActive === 'undefined') {
     previewBtn.style.padding = '2px 8px';
     previewBtn.style.cursor = 'pointer';
     previewBtn.style.fontSize = '12px';
-    
+
     const clearBtn = document.createElement('button');
     clearBtn.innerText = 'Clear';
     clearBtn.style.background = 'none';
@@ -153,7 +153,7 @@ if (typeof window.zenIsActive === 'undefined') {
     clearBtn.style.padding = '2px 8px';
     clearBtn.style.cursor = 'pointer';
     clearBtn.style.fontSize = '12px';
-    
+
     btnContainer.appendChild(previewBtn);
     btnContainer.appendChild(clearBtn);
     titleDiv.appendChild(btnContainer);
@@ -162,7 +162,7 @@ if (typeof window.zenIsActive === 'undefined') {
     textarea.id = 'zen-scratchpad-textarea';
     textarea.contentEditable = 'true';
     textarea.setAttribute('placeholder', 'Type calculations or paste LaTeX here...\n\n(Auto-saves automatically)');
-    
+
     const previewDiv = document.createElement('div');
     previewDiv.id = 'zen-scratchpad-preview';
     previewDiv.style.display = 'none';
@@ -172,14 +172,14 @@ if (typeof window.zenIsActive === 'undefined') {
     if (savedNotes) {
       textarea.innerHTML = savedNotes;
     }
-    
+
     // Auto-save on type
     textarea.addEventListener('input', (e) => {
       localStorage.setItem('zen_scratchpad_content', e.target.innerHTML);
     });
 
     clearBtn.onclick = () => {
-      if(confirm('Clear all notes?')) {
+      if (confirm('Clear all notes?')) {
         textarea.innerHTML = '';
         localStorage.removeItem('zen_scratchpad_content');
         if (previewDiv.style.display === 'block') previewBtn.click(); // switch back to edit
@@ -192,10 +192,10 @@ if (typeof window.zenIsActive === 'undefined') {
         textarea.style.display = 'none';
         previewDiv.style.display = 'block';
         previewBtn.innerText = '✏️ Edit';
-        
+
         let safeHTML = textarea.innerHTML;
         previewDiv.innerHTML = safeHTML;
-        
+
         // Inject script to render math using the host page's MathJax/KaTeX
         const script = document.createElement('script');
         script.textContent = `
@@ -221,7 +221,7 @@ if (typeof window.zenIsActive === 'undefined') {
         `;
         document.body.appendChild(script);
         setTimeout(() => script.remove(), 100);
-        
+
       } else {
         // Switch to edit mode
         textarea.style.display = 'block';
@@ -234,7 +234,7 @@ if (typeof window.zenIsActive === 'undefined') {
     padDiv.appendChild(textarea);
     padDiv.appendChild(previewDiv);
     document.body.appendChild(padDiv);
-    
+
     // Shift content so it doesn't overlap
     document.body.classList.add('zen-scratchpad-open');
   }
@@ -265,7 +265,7 @@ if (typeof window.zenIsActive === 'undefined') {
   // Restore state on load (handles dynamic pages and extension injection timing)
   function tryRestoreZenMode() {
     console.log("[Zen Snipper] Extension script loaded on this page!");
-    
+
     let savedUrl = localStorage.getItem('zen_mode_url');
     if (!savedUrl) {
       console.log("[Zen Snipper] No saved URL found. Normal load.");
@@ -275,13 +275,13 @@ if (typeof window.zenIsActive === 'undefined') {
     try {
       let savedPath = new URL(savedUrl).pathname;
       let currentPath = window.location.pathname;
-      
+
       console.log("[Zen Snipper] Checking restore. Saved path:", savedPath, "Current:", currentPath);
-      
+
       if (savedPath === currentPath) {
         const selector = localStorage.getItem('zen_mode_selector');
         console.log("[Zen Snipper] URL matched. Hunting for selector:", selector);
-        
+
         if (selector) {
           let attempts = 0;
           let restoreInterval = setInterval(() => {
@@ -296,7 +296,7 @@ if (typeof window.zenIsActive === 'undefined') {
               console.error("[Zen Snipper] Invalid selector:", e);
               clearInterval(restoreInterval);
             }
-            
+
             attempts++;
             if (attempts > 15) {
               console.log("[Zen Snipper] Gave up trying to find the element.");
@@ -305,7 +305,7 @@ if (typeof window.zenIsActive === 'undefined') {
           }, 500);
         }
       }
-    } catch(e) {
+    } catch (e) {
       console.error("[Zen Snipper] Error parsing URL:", e);
     }
   }
@@ -319,11 +319,11 @@ if (typeof window.zenIsActive === 'undefined') {
   // Keep visual feedback ONLY for tools inside Zen Mode (Eraser/Copy)
   document.addEventListener('mouseover', (e) => {
     window.zenCurrentHover = e.target;
-    
+
     if (window.zenIsActive && !window.zenIsSelecting && e.target !== document.body && e.target !== document.documentElement) {
       document.querySelectorAll('.zen-eraser-hover').forEach(el => el.classList.remove('zen-eraser-hover'));
       document.querySelectorAll('.zen-copy-hover').forEach(el => el.classList.remove('zen-copy-hover'));
-      
+
       if (e.target.closest('.zen-isolated-element')) {
         if (window.zenIsCopying) {
           e.target.classList.add('zen-copy-hover');
@@ -352,7 +352,7 @@ if (typeof window.zenIsActive === 'undefined') {
   }, true);
 
   document.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.isComposing) return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable || e.isComposing) return;
 
     // Undo/Redo with Ctrl+Z / Ctrl+Y
     if (e.ctrlKey || e.metaKey) {
@@ -397,7 +397,7 @@ if (typeof window.zenIsActive === 'undefined') {
         if (themeBtn) themeBtn.click();
         return;
       }
-      
+
       if (e.key.toLowerCase() === 't') {
         toggleTimer();
         return;
@@ -422,9 +422,9 @@ if (typeof window.zenIsActive === 'undefined') {
 
     // Delete hovered element with D or X (Only if NOT copying)
     if (!window.zenIsCopying && (e.key.toLowerCase() === 'd' || e.key.toLowerCase() === 'x') && window.zenIsActive && window.zenCurrentHover) {
-      if (window.zenCurrentHover !== document.body && 
-          window.zenCurrentHover !== document.documentElement &&
-          window.zenCurrentHover.id !== 'zen-snipper-reset') {
+      if (window.zenCurrentHover !== document.body &&
+        window.zenCurrentHover !== document.documentElement &&
+        window.zenCurrentHover.id !== 'zen-snipper-reset') {
         window.zenCurrentHover.classList.add('zen-hidden');
         window.zenDeletedStack.push(window.zenCurrentHover);
         window.zenRedoStack = []; // Clear redo stack on new action
@@ -436,12 +436,12 @@ if (typeof window.zenIsActive === 'undefined') {
     if (e.key.toLowerCase() === 'c' && window.zenIsActive) {
       if (window.zenIsCopying) {
         // In copy mode, if hovering over a valid block, copy it!
-        if (window.zenCurrentHover && window.zenCurrentHover !== document.body && 
-            window.zenCurrentHover !== document.documentElement &&
-            window.zenCurrentHover.id !== 'zen-snipper-reset') {
-          
+        if (window.zenCurrentHover && window.zenCurrentHover !== document.body &&
+          window.zenCurrentHover !== document.documentElement &&
+          window.zenCurrentHover.id !== 'zen-snipper-reset') {
+
           copySmartElement(window.zenCurrentHover);
-          
+
           // Visual feedback flash
           const oldBg = window.zenCurrentHover.style.backgroundColor;
           window.zenCurrentHover.style.backgroundColor = 'rgba(74, 222, 128, 0.4)';
@@ -513,17 +513,17 @@ if (typeof window.zenIsActive === 'undefined') {
     if (!historyDiv) {
       historyDiv = document.createElement('div');
       historyDiv.id = 'zen-mobile-history';
-      
+
       const undoBtn = document.createElement('button');
       undoBtn.id = 'zen-btn-undo';
       undoBtn.innerHTML = '↶';
       undoBtn.onclick = performUndo;
-      
+
       const redoBtn = document.createElement('button');
       redoBtn.id = 'zen-btn-redo';
       redoBtn.innerHTML = '↷';
       redoBtn.onclick = performRedo;
-      
+
       historyDiv.appendChild(undoBtn);
       historyDiv.appendChild(redoBtn);
       document.body.appendChild(historyDiv);
@@ -535,43 +535,57 @@ if (typeof window.zenIsActive === 'undefined') {
   let mobileEraseTarget = null;
   function handleMobileEraseClick(e) {
     if (!window.zenIsActive || !isTouchDevice() || window.zenIsSelecting) return;
-    
+
     // Ignore UI elements
     if (e.target.closest('#zen-theme-btn') || e.target.closest('#zen-snipper-reset') || e.target.closest('#zen-theme-menu') || e.target.closest('#zen-scratchpad') || e.target.closest('#zen-mobile-history') || e.target.closest('#zen-focus-timer') || e.target.closest('#zen-toast')) return;
-    
-    // Tap the Minus Button to Delete
+
+    // Tap the Minus / Copy Button
     if (e.target.id === 'zen-mobile-delete-btn' || e.target.closest('#zen-mobile-delete-btn')) {
       e.preventDefault();
       e.stopPropagation();
       if (mobileEraseTarget) {
-         mobileEraseTarget.classList.add('zen-hidden');
-         window.zenDeletedStack.push(mobileEraseTarget);
-         window.zenRedoStack = [];
-         updateHistoryButtons();
+         if (window.zenIsCopying) {
+           copySmartElement(mobileEraseTarget);
+           showToast("✅ Copied block to clipboard!", 2000);
+         } else {
+           mobileEraseTarget.classList.add('zen-hidden');
+           window.zenDeletedStack.push(mobileEraseTarget);
+           window.zenRedoStack = [];
+           updateHistoryButtons();
+         }
       }
       clearMobileErase();
       return;
     }
-    
-    // Tap a block to highlight it for deletion
+
+    // Tap a block to highlight it for deletion / copy
     if (e.target.closest('.zen-isolated-element')) {
       clearMobileErase();
-      
+
       let target = e.target;
       if (target.nodeType === 3) target = target.parentNode;
-      
+
       mobileEraseTarget = target;
-      target.classList.add('zen-mobile-erase-box');
-      
+
       const btn = document.createElement('button');
       btn.id = 'zen-mobile-delete-btn';
-      btn.innerHTML = '−';
+
+      if (window.zenIsCopying) {
+        target.classList.add('zen-mobile-copy-box');
+        btn.innerHTML = '📋';
+        btn.style.background = '#10b981';
+        btn.style.borderColor = '#10b981';
+      } else {
+        target.classList.add('zen-mobile-erase-box');
+        btn.innerHTML = '−';
+      }
+
       document.body.appendChild(btn);
-      
+
       const rect = target.getBoundingClientRect();
       btn.style.top = (rect.top - 15) + 'px';
       btn.style.left = (rect.right - 15) + 'px';
-      
+
       // Update position on scroll
       window.addEventListener('scroll', updateMobileEraseBtnPosition, true);
     } else {
@@ -590,6 +604,7 @@ if (typeof window.zenIsActive === 'undefined') {
   function clearMobileErase() {
     window.removeEventListener('scroll', updateMobileEraseBtnPosition, true);
     document.querySelectorAll('.zen-mobile-erase-box').forEach(el => el.classList.remove('zen-mobile-erase-box'));
+    document.querySelectorAll('.zen-mobile-copy-box').forEach(el => el.classList.remove('zen-mobile-copy-box'));
     const btn = document.getElementById('zen-mobile-delete-btn');
     if (btn) btn.remove();
     mobileEraseTarget = null;
@@ -640,7 +655,7 @@ if (typeof window.zenIsActive === 'undefined') {
 
   function handleSelectionClickMobile(e) {
     if (!window.zenIsSelecting) return;
-    
+
     if (e.target.id === 'zen-mobile-confirm-btn' || e.target.closest('#zen-mobile-confirm-btn')) {
       e.preventDefault();
       e.stopPropagation();
@@ -649,21 +664,21 @@ if (typeof window.zenIsActive === 'undefined') {
       if (target) isolateElement(target);
       return;
     }
-    
+
     e.preventDefault();
     e.stopPropagation();
     clearMobileSelection();
-    
+
     let target = e.target;
     if (target.nodeType === 3) target = target.parentNode;
-    
+
     window.zenTargetToIsolate = target;
     target.classList.add('zen-mobile-selection-box');
-    
+
     const btn = document.createElement('button');
     btn.id = 'zen-mobile-confirm-btn';
     btn.innerHTML = '+';
-    
+
     document.body.appendChild(btn);
     updateConfirmBtnPosition();
     window.addEventListener('scroll', updateConfirmBtnPosition, true);
@@ -688,7 +703,7 @@ if (typeof window.zenIsActive === 'undefined') {
     document.removeEventListener('mouseover', handleMouseOverDesktop, true);
     document.removeEventListener('mouseout', handleMouseOutDesktop, true);
     document.removeEventListener('click', handleClickDesktop, true);
-    
+
     clearMobileSelection();
     document.querySelectorAll('.zen-snipper-hover').forEach(el => {
       el.classList.remove('zen-snipper-hover');
@@ -707,7 +722,7 @@ if (typeof window.zenIsActive === 'undefined') {
 
     let toHide = [];
     let current = target;
-    
+
     // Walk up the DOM tree to the body
     while (current && current !== document.body && current !== document.documentElement) {
       let parent = current.parentElement;
@@ -718,10 +733,10 @@ if (typeof window.zenIsActive === 'undefined') {
         for (let i = 0; i < siblings.length; i++) {
           let sibling = siblings[i];
           // If it's not the path element, and it's not a script/style tag, and not our button
-          if (sibling !== current && 
-              sibling.tagName !== 'SCRIPT' && 
-              sibling.tagName !== 'STYLE' && 
-              sibling.id !== 'zen-snipper-reset') {
+          if (sibling !== current &&
+            sibling.tagName !== 'SCRIPT' &&
+            sibling.tagName !== 'STYLE' &&
+            sibling.id !== 'zen-snipper-reset') {
             toHide.push(sibling);
           }
         }
@@ -745,7 +760,7 @@ if (typeof window.zenIsActive === 'undefined') {
 
   function createControls() {
     if (document.getElementById('zen-snipper-reset')) return;
-    
+
     // Reset Button
     const btn = document.createElement('button');
     btn.id = 'zen-snipper-reset';
@@ -763,7 +778,7 @@ if (typeof window.zenIsActive === 'undefined') {
     // Theme Selection Menu
     const menu = document.createElement('div');
     menu.id = 'zen-theme-menu';
-    
+
     const themes = [
       { id: 'dark', label: 'OLED Dark' },
       { id: 'midnight', label: 'Midnight Blue' },
@@ -857,7 +872,7 @@ if (typeof window.zenIsActive === 'undefined') {
     if (localStorage.getItem('zen_timer_active') === 'true') {
       createTimerUI();
     }
-    
+
     // Restore scratchpad if it was active
     if (localStorage.getItem('zen_scratchpad_active') === 'true') {
       createScratchpadUI();
@@ -887,15 +902,15 @@ if (typeof window.zenIsActive === 'undefined') {
     console.log("[Zen Snipper] Zen Mode exited. Cleared localStorage.");
 
     document.body.classList.remove('zen-snipper-active', 'zen-theme-dark', 'zen-theme-midnight', 'zen-theme-paper', 'zen-theme-hacker');
-    
+
     const hiddenElements = document.querySelectorAll('.zen-hidden');
     hiddenElements.forEach(el => el.classList.remove('zen-hidden'));
-    
+
     const isolated = document.querySelectorAll('.zen-isolated-element');
     isolated.forEach(el => el.classList.remove('zen-isolated-element'));
-    
+
     document.querySelectorAll('.zen-eraser-hover').forEach(el => el.classList.remove('zen-eraser-hover'));
-    
+
     const noBg = document.querySelectorAll('.zen-no-bg');
     noBg.forEach(el => el.classList.remove('zen-no-bg'));
 
@@ -914,12 +929,12 @@ if (typeof window.zenIsActive === 'undefined') {
     const historyDiv = document.getElementById('zen-mobile-history');
     if (historyDiv) historyDiv.remove();
     clearMobileErase();
-    
+
     document.body.classList.remove('zen-scratchpad-open', 'zen-shortcuts-open');
-    
+
     if (zenTimerInterval) clearInterval(zenTimerInterval);
     zenTimerInterval = null;
-    
+
     window.zenDeletedStack = [];
     window.zenRedoStack = [];
   }
@@ -931,10 +946,10 @@ if (typeof window.zenIsActive === 'undefined') {
       modal.remove();
       return;
     }
-    
+
     modal = document.createElement('div');
     modal.id = 'zen-shortcuts-modal';
-    
+
     modal.innerHTML = `
       <div id="zen-shortcuts-header">
         ⌨️ Keyboard Shortcuts
@@ -956,7 +971,7 @@ if (typeof window.zenIsActive === 'undefined') {
         <div><span>Esc / Q</span><span>Exit Zen Mode</span></div>
       </div>
     `;
-    
+
     document.body.appendChild(modal);
     document.getElementById('zen-shortcuts-close').onclick = () => modal.remove();
   }
@@ -964,29 +979,29 @@ if (typeof window.zenIsActive === 'undefined') {
   // --- SMART COPY LOGIC ---
   function copySmartElement(target) {
     if (!target) return;
-    
+
     let clone = target.cloneNode(true);
-    
+
     // Clean out deleted elements from Eraser Tool
     clone.querySelectorAll('.zen-hidden').forEach(el => el.remove());
-    
+
     // MathJax v2: <script type="math/tex">
     let scripts = clone.querySelectorAll('script[type^="math/tex"]');
     scripts.forEach(script => {
       let tex = script.textContent;
       let isDisplay = script.type.includes('mode=display');
       let textNode = document.createTextNode(isDisplay ? `\n$$${tex}$$\n` : ` $${tex}$ `);
-      
+
       // Attempt to remove the rendered MathJax span (usually previous sibling)
       let prev = script.previousElementSibling;
-      while(prev && prev.className && typeof prev.className === 'string' && prev.className.includes('MathJax')) {
+      while (prev && prev.className && typeof prev.className === 'string' && prev.className.includes('MathJax')) {
         let toRemove = prev;
         prev = prev.previousElementSibling;
         toRemove.remove();
       }
       script.parentNode.replaceChild(textNode, script);
     });
-    
+
     // MathJax v3 / KaTeX: <annotation encoding="application/x-tex">
     let annotations = clone.querySelectorAll('annotation[encoding="application/x-tex"]');
     annotations.forEach(ann => {
@@ -996,7 +1011,7 @@ if (typeof window.zenIsActive === 'undefined') {
         let isDisplay = false;
         if (wrapper.tagName.toLowerCase() === 'mjx-container' && wrapper.getAttribute('display') === 'true') isDisplay = true;
         if (wrapper.classList && wrapper.classList.contains('katex-display')) isDisplay = true;
-        
+
         let textNode = document.createTextNode(isDisplay ? `\n$$${tex}$$\n` : ` $${tex}$ `);
         wrapper.parentNode.replaceChild(textNode, wrapper);
       }
@@ -1012,7 +1027,7 @@ if (typeof window.zenIsActive === 'undefined') {
     document.body.appendChild(clone);
     let finalContent = clone.innerText.trim();
     document.body.removeChild(clone);
-    
+
     // Copy to clipboard
     navigator.clipboard.writeText(finalContent).then(() => {
       console.log("Zen Snipper: Successfully copied smart text.");
