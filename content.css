@@ -427,3 +427,144 @@ body.zen-ultra-focus #zen-focus-timer {
   opacity: 0 !important;
   pointer-events: none !important;
 }
+
+/* --- MOBILE RESPONSIVENESS & TOUCH UX --- */
+/* Two-Tap Selection Mode */
+.zen-mobile-selection-box {
+  outline: 3px solid #3b82f6 !important;
+  outline-offset: 4px !important;
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  transition: all 0.2s ease !important;
+}
+
+#zen-mobile-confirm-btn {
+  position: fixed !important;
+  width: 36px !important;
+  height: 36px !important;
+  background: #3b82f6 !important;
+  color: white !important;
+  border: 2px solid white !important;
+  border-radius: 50% !important;
+  font-size: 24px !important;
+  font-weight: bold !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  z-index: 99999999 !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4) !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  pointer-events: auto !important;
+  transition: transform 0.1s !important;
+}
+
+#zen-mobile-confirm-btn:active,
+#zen-mobile-delete-btn:active {
+  transform: scale(0.9) !important;
+}
+
+/* Eraser Box (Red) */
+.zen-mobile-erase-box {
+  outline: 3px solid #ef4444 !important;
+  outline-offset: 4px !important;
+  background-color: rgba(239, 68, 68, 0.1) !important;
+  transition: all 0.2s ease !important;
+}
+
+#zen-mobile-delete-btn {
+  position: fixed !important;
+  width: 36px !important;
+  height: 36px !important;
+  background: #ef4444 !important;
+  color: white !important;
+  border: 2px solid white !important;
+  border-radius: 50% !important;
+  font-size: 24px !important;
+  font-weight: bold !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  z-index: 99999999 !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4) !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  pointer-events: auto !important;
+  transition: transform 0.1s !important;
+}
+
+/* History Tools */
+#zen-mobile-history {
+  position: fixed !important;
+  top: 20px !important;
+  left: 20px !important;
+  display: flex !important;
+  gap: 12px !important;
+  z-index: 9999999 !important;
+}
+
+#zen-mobile-history button {
+  width: 44px !important;
+  height: 44px !important;
+  background: rgba(30, 30, 36, 0.95) !important;
+  color: white !important;
+  border: 1px solid #444 !important;
+  border-radius: 50% !important;
+  font-size: 22px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;
+  cursor: pointer !important;
+  transition: opacity 0.2s !important;
+}
+
+@media screen and (max-width: 768px) {
+  #zen-scratchpad {
+    top: 20px !important;
+    right: 10px !important;
+    left: 10px !important;
+    width: calc(100% - 20px) !important;
+    height: 50vh !important;
+    z-index: 9999999 !important;
+  }
+  
+  .zen-isolated-element {
+    margin: 20px auto !important;
+    width: calc(100% - 20px) !important;
+    padding: 15px !important;
+    box-sizing: border-box !important;
+  }
+  
+  body.zen-scratchpad-open .zen-isolated-element,
+  body.zen-shortcuts-open .zen-isolated-element {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  
+  body.zen-scratchpad-open .zen-isolated-element {
+    margin-top: 55vh !important;
+  }
+
+  #zen-theme-menu {
+    right: 10px !important;
+    bottom: 80px !important;
+  }
+  
+  #zen-theme-btn {
+    right: 10px !important;
+    bottom: 20px !important;
+  }
+  
+  .zen-shortcuts-btn-option {
+    display: none !important;
+  }
+  
+  #zen-snipper-reset {
+    right: 65px !important;
+    bottom: 20px !important;
+    padding: 10px 16px !important;
+    font-size: 14px !important;
+  }
+}

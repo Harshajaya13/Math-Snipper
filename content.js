@@ -3,8 +3,10 @@ if (typeof window.zenIsActive === 'undefined') {
   window.zenIsActive = false;
   window.zenIsSelecting = false;
   window.zenCurrentHover = null;
-  window.zenDeletedStack = []; // Stack for undo functionality
-  window.zenIsCopying = false; // Copy Mode state
+  window.zenDeletedStack = []; 
+  window.zenRedoStack = []; // Redo stack
+  window.zenIsCopying = false;
+  window.zenTargetToIsolate = null; // Used for mobile selection
 
   function showToast(msg, duration = 3000) {
     let toast = document.getElementById('zen-toast');
@@ -314,16 +316,14 @@ if (typeof window.zenIsActive === 'undefined') {
     window.addEventListener('load', tryRestoreZenMode);
   }
 
+  // Keep visual feedback ONLY for tools inside Zen Mode (Eraser/Copy)
   document.addEventListener('mouseover', (e) => {
     window.zenCurrentHover = e.target;
     
-    // Add visual feedback for the Tools
-    if (window.zenIsActive && e.target !== document.body && e.target !== document.documentElement) {
-      // Clean up previous
+    if (window.zenIsActive && !window.zenIsSelecting && e.target !== document.body && e.target !== document.documentElement) {
       document.querySelectorAll('.zen-eraser-hover').forEach(el => el.classList.remove('zen-eraser-hover'));
       document.querySelectorAll('.zen-copy-hover').forEach(el => el.classList.remove('zen-copy-hover'));
       
-      // Only highlight if it's inside the isolated element
       if (e.target.closest('.zen-isolated-element')) {
         if (window.zenIsCopying) {
           e.target.classList.add('zen-copy-hover');
@@ -335,7 +335,7 @@ if (typeof window.zenIsActive === 'undefined') {
   }, true);
 
   document.addEventListener('mouseout', (e) => {
-    if (window.zenIsActive) {
+    if (window.zenIsActive && !window.zenIsSelecting) {
       e.target.classList.remove('zen-eraser-hover');
       e.target.classList.remove('zen-copy-hover');
     }
@@ -354,14 +354,15 @@ if (typeof window.zenIsActive === 'undefined') {
   document.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.isComposing) return;
 
-    // Undo the last deletion with Ctrl+Z or Cmd+Z
+    // Undo/Redo with Ctrl+Z / Ctrl+Y
     if (e.ctrlKey || e.metaKey) {
       if (e.key.toLowerCase() === 'z' && window.zenIsActive) {
-        if (window.zenDeletedStack.length > 0) {
-          let lastDeleted = window.zenDeletedStack.pop();
-          if (lastDeleted) lastDeleted.classList.remove('zen-hidden');
-        }
-        e.preventDefault(); // prevent default browser undo behavior
+        performUndo();
+        e.preventDefault();
+      }
+      if (e.key.toLowerCase() === 'y' && window.zenIsActive) {
+        performRedo();
+        e.preventDefault();
       }
       return; // Ignore other ctrl/cmd shortcuts
     }
@@ -425,7 +426,9 @@ if (typeof window.zenIsActive === 'undefined') {
           window.zenCurrentHover !== document.documentElement &&
           window.zenCurrentHover.id !== 'zen-snipper-reset') {
         window.zenCurrentHover.classList.add('zen-hidden');
-        window.zenDeletedStack.push(window.zenCurrentHover); // Save it to the stack
+        window.zenDeletedStack.push(window.zenCurrentHover);
+        window.zenRedoStack = []; // Clear redo stack on new action
+        if (typeof updateHistoryButtons === 'function') updateHistoryButtons();
       }
     }
 
@@ -471,43 +474,222 @@ if (typeof window.zenIsActive === 'undefined') {
     }
   });
 
-  function handleMouseOver(e) {
+  const isTouchDevice = () => window.matchMedia("(pointer: coarse)").matches;
+
+  // --- UNDO / REDO API ---
+  function updateHistoryButtons() {
+    const undoBtn = document.getElementById('zen-btn-undo');
+    const redoBtn = document.getElementById('zen-btn-redo');
+    if (!undoBtn || !redoBtn) return;
+    undoBtn.style.opacity = window.zenDeletedStack.length > 0 ? '1' : '0.3';
+    redoBtn.style.opacity = window.zenRedoStack.length > 0 ? '1' : '0.3';
+  }
+
+  function performUndo() {
+    if (window.zenDeletedStack.length > 0) {
+      let lastDeleted = window.zenDeletedStack.pop();
+      if (lastDeleted) {
+        lastDeleted.classList.remove('zen-hidden');
+        window.zenRedoStack.push(lastDeleted);
+      }
+      updateHistoryButtons();
+    }
+  }
+
+  function performRedo() {
+    if (window.zenRedoStack.length > 0) {
+      let lastRedo = window.zenRedoStack.pop();
+      if (lastRedo) {
+        lastRedo.classList.add('zen-hidden');
+        window.zenDeletedStack.push(lastRedo);
+      }
+      updateHistoryButtons();
+    }
+  }
+
+  function createHistoryUI() {
+    if (!isTouchDevice()) return; // Only for mobile
+    let historyDiv = document.getElementById('zen-mobile-history');
+    if (!historyDiv) {
+      historyDiv = document.createElement('div');
+      historyDiv.id = 'zen-mobile-history';
+      
+      const undoBtn = document.createElement('button');
+      undoBtn.id = 'zen-btn-undo';
+      undoBtn.innerHTML = '↶';
+      undoBtn.onclick = performUndo;
+      
+      const redoBtn = document.createElement('button');
+      redoBtn.id = 'zen-btn-redo';
+      redoBtn.innerHTML = '↷';
+      redoBtn.onclick = performRedo;
+      
+      historyDiv.appendChild(undoBtn);
+      historyDiv.appendChild(redoBtn);
+      document.body.appendChild(historyDiv);
+    }
+    updateHistoryButtons();
+  }
+
+  // --- MOBILE ERASER LOGIC ---
+  let mobileEraseTarget = null;
+  function handleMobileEraseClick(e) {
+    if (!window.zenIsActive || !isTouchDevice() || window.zenIsSelecting) return;
+    
+    // Ignore UI elements
+    if (e.target.closest('#zen-theme-btn') || e.target.closest('#zen-snipper-reset') || e.target.closest('#zen-theme-menu') || e.target.closest('#zen-scratchpad') || e.target.closest('#zen-mobile-history') || e.target.closest('#zen-focus-timer') || e.target.closest('#zen-toast')) return;
+    
+    // Tap the Minus Button to Delete
+    if (e.target.id === 'zen-mobile-delete-btn' || e.target.closest('#zen-mobile-delete-btn')) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (mobileEraseTarget) {
+         mobileEraseTarget.classList.add('zen-hidden');
+         window.zenDeletedStack.push(mobileEraseTarget);
+         window.zenRedoStack = [];
+         updateHistoryButtons();
+      }
+      clearMobileErase();
+      return;
+    }
+    
+    // Tap a block to highlight it for deletion
+    if (e.target.closest('.zen-isolated-element')) {
+      clearMobileErase();
+      
+      let target = e.target;
+      if (target.nodeType === 3) target = target.parentNode;
+      
+      mobileEraseTarget = target;
+      target.classList.add('zen-mobile-erase-box');
+      
+      const btn = document.createElement('button');
+      btn.id = 'zen-mobile-delete-btn';
+      btn.innerHTML = '−';
+      document.body.appendChild(btn);
+      
+      const rect = target.getBoundingClientRect();
+      btn.style.top = (rect.top - 15) + 'px';
+      btn.style.left = (rect.right - 15) + 'px';
+      
+      // Update position on scroll
+      window.addEventListener('scroll', updateMobileEraseBtnPosition, true);
+    } else {
+      clearMobileErase();
+    }
+  }
+
+  function updateMobileEraseBtnPosition() {
+    const btn = document.getElementById('zen-mobile-delete-btn');
+    if (!btn || !mobileEraseTarget) return;
+    const rect = mobileEraseTarget.getBoundingClientRect();
+    btn.style.top = (rect.top - 15) + 'px';
+    btn.style.left = (rect.right - 15) + 'px';
+  }
+
+  function clearMobileErase() {
+    window.removeEventListener('scroll', updateMobileEraseBtnPosition, true);
+    document.querySelectorAll('.zen-mobile-erase-box').forEach(el => el.classList.remove('zen-mobile-erase-box'));
+    const btn = document.getElementById('zen-mobile-delete-btn');
+    if (btn) btn.remove();
+    mobileEraseTarget = null;
+  }
+
+  document.addEventListener('click', handleMobileEraseClick, true);
+
+  // --- DESKTOP HOVER LOGIC ---
+  function handleMouseOverDesktop(e) {
     if (!window.zenIsSelecting) return;
     e.stopPropagation();
     e.target.classList.add('zen-snipper-hover');
   }
 
-  function handleMouseOut(e) {
+  function handleMouseOutDesktop(e) {
     if (!window.zenIsSelecting) return;
     e.stopPropagation();
     e.target.classList.remove('zen-snipper-hover');
   }
 
-  function handleClick(e) {
+  function handleClickDesktop(e) {
     if (!window.zenIsSelecting) return;
     e.preventDefault();
     e.stopPropagation();
-    
     e.target.classList.remove('zen-snipper-hover');
     isolateElement(e.target);
   }
 
+  // --- MOBILE-FRIENDLY TWO-TAP SELECTION LOGIC ---
+  function clearMobileSelection() {
+    window.removeEventListener('scroll', updateConfirmBtnPosition, true);
+    document.querySelectorAll('.zen-mobile-selection-box').forEach(el => {
+      el.classList.remove('zen-mobile-selection-box');
+    });
+    const btn = document.getElementById('zen-mobile-confirm-btn');
+    if (btn) btn.remove();
+    window.zenTargetToIsolate = null;
+  }
+
+  function updateConfirmBtnPosition() {
+    const btn = document.getElementById('zen-mobile-confirm-btn');
+    const target = window.zenTargetToIsolate;
+    if (!btn || !target) return;
+    const rect = target.getBoundingClientRect();
+    btn.style.top = (rect.top - 15) + 'px';
+    btn.style.left = (rect.right - 15) + 'px';
+  }
+
+  function handleSelectionClickMobile(e) {
+    if (!window.zenIsSelecting) return;
+    
+    if (e.target.id === 'zen-mobile-confirm-btn' || e.target.closest('#zen-mobile-confirm-btn')) {
+      e.preventDefault();
+      e.stopPropagation();
+      let target = window.zenTargetToIsolate;
+      clearMobileSelection();
+      if (target) isolateElement(target);
+      return;
+    }
+    
+    e.preventDefault();
+    e.stopPropagation();
+    clearMobileSelection();
+    
+    let target = e.target;
+    if (target.nodeType === 3) target = target.parentNode;
+    
+    window.zenTargetToIsolate = target;
+    target.classList.add('zen-mobile-selection-box');
+    
+    const btn = document.createElement('button');
+    btn.id = 'zen-mobile-confirm-btn';
+    btn.innerHTML = '+';
+    
+    document.body.appendChild(btn);
+    updateConfirmBtnPosition();
+    window.addEventListener('scroll', updateConfirmBtnPosition, true);
+  }
+
   function startSelection() {
     window.zenIsSelecting = true;
-    document.addEventListener('mouseover', handleMouseOver, true);
-    document.addEventListener('mouseout', handleMouseOut, true);
-    document.addEventListener('click', handleClick, true);
-    
-    console.log("Zen Snipper: Hover and click a block to isolate.");
+    if (isTouchDevice()) {
+      document.addEventListener('click', handleSelectionClickMobile, true);
+      showToast("Tap a block to highlight it, then tap the '+' button!", 4000);
+    } else {
+      document.addEventListener('mouseover', handleMouseOverDesktop, true);
+      document.addEventListener('mouseout', handleMouseOutDesktop, true);
+      document.addEventListener('click', handleClickDesktop, true);
+      showToast("Hover and click a block to isolate.", 4000);
+    }
   }
 
   function stopSelectionEvents() {
     window.zenIsSelecting = false;
-    document.removeEventListener('mouseover', handleMouseOver, true);
-    document.removeEventListener('mouseout', handleMouseOut, true);
-    document.removeEventListener('click', handleClick, true);
+    document.removeEventListener('click', handleSelectionClickMobile, true);
+    document.removeEventListener('mouseover', handleMouseOverDesktop, true);
+    document.removeEventListener('mouseout', handleMouseOutDesktop, true);
+    document.removeEventListener('click', handleClickDesktop, true);
     
-    // Clean up any stray hovers
+    clearMobileSelection();
     document.querySelectorAll('.zen-snipper-hover').forEach(el => {
       el.classList.remove('zen-snipper-hover');
     });
@@ -558,6 +740,7 @@ if (typeof window.zenIsActive === 'undefined') {
     target.classList.add('zen-isolated-element');
 
     createControls();
+    createHistoryUI(); // Add Mobile History Buttons
   }
 
   function createControls() {
@@ -653,9 +836,9 @@ if (typeof window.zenIsActive === 'undefined') {
     };
     menu.appendChild(optPad);
 
-    // Add Shortcuts Toggle
+    // Add Shortcuts Toggle (Hidden on mobile via CSS)
     let optShortcuts = document.createElement('button');
-    optShortcuts.className = 'zen-theme-option';
+    optShortcuts.className = 'zen-theme-option zen-shortcuts-btn-option';
     optShortcuts.style.marginTop = '4px';
     optShortcuts.style.borderTop = '1px solid #444';
     optShortcuts.style.background = 'transparent';
@@ -728,11 +911,17 @@ if (typeof window.zenIsActive === 'undefined') {
     if (pad) pad.remove();
     const modal = document.getElementById('zen-shortcuts-modal');
     if (modal) modal.remove();
+    const historyDiv = document.getElementById('zen-mobile-history');
+    if (historyDiv) historyDiv.remove();
+    clearMobileErase();
     
-    document.body.classList.remove('zen-scratchpad-open');
+    document.body.classList.remove('zen-scratchpad-open', 'zen-shortcuts-open');
     
     if (zenTimerInterval) clearInterval(zenTimerInterval);
     zenTimerInterval = null;
+    
+    window.zenDeletedStack = [];
+    window.zenRedoStack = [];
   }
 
   // --- SHORTCUTS MODAL ---
