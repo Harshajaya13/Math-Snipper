@@ -74,7 +74,15 @@ Our extension uses strict, modern **Manifest V3** security rules.
 
 *(Note: Since Chromium browsers use Service Workers instead of background scripts, you may need to open `manifest.json` and change `"scripts": ["background.js"]` to `"service_worker": "background.js"` if you experience background script errors).*
 
-### 3️⃣ Apple Safari
+### 3️⃣ Iceraven (Android/Mobile)
+Because standard Firefox for Android blocks custom extensions, we recommend **Iceraven**, a developer-friendly fork that supports `.xpi` extensions directly:
+1. Transfer the `zen_math_snipper-1.0.xpi` file to your Android phone.
+2. Open **Iceraven** and type `about:config` in the URL bar.
+3. Search for `xpinstall.signatures.required` and toggle it to **`false`**.
+4. Now, type `file:///` in the URL bar and navigate to where you saved the `.xpi` file (e.g. `file:///storage/emulated/0/Download/`).
+5. Tap the `.xpi` file to instantly install Zen Math Snipper!
+
+### 4️⃣ Apple Safari
 Because Safari uses native macOS app packaging for extensions:
 1. Open your terminal and run Apple's command-line converter:
    `xcrun safari-web-extension-converter /path/to/zen-extension`

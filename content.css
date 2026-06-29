@@ -623,42 +623,78 @@ body.zen-ultra-focus #zen-focus-timer {
   transform: scale(0.9) !important;
 }
 
-/* Eraser & Copy Boxes */
-.zen-mobile-erase-box {
-  outline: 3px solid #ef4444 !important;
+/* Action Box (Blue/Neutral) */
+.zen-mobile-action-box {
+  outline: 3px solid #8b5cf6 !important;
   outline-offset: 4px !important;
-  background-color: rgba(239, 68, 68, 0.1) !important;
+  background-color: rgba(139, 92, 246, 0.1) !important;
   transition: all 0.2s ease !important;
 }
 
-.zen-mobile-copy-box {
-  outline: 3px dashed #10b981 !important;
-  outline-offset: 4px !important;
-  background-color: rgba(16, 185, 129, 0.1) !important;
-  transition: all 0.2s ease !important;
-}
-
-#zen-mobile-delete-btn {
+#zen-mobile-action-group {
   position: fixed !important;
-  width: 28px !important;
-  height: 28px !important;
-  background: #ef4444 !important;
+  z-index: 99999999 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  gap: 8px !important;
+}
+
+#zen-mobile-settings-btn {
+  width: 32px !important;
+  height: 32px !important;
+  background: #3f3f46 !important;
   color: white !important;
   border: 2px solid white !important;
   border-radius: 50% !important;
-  font-size: 20px !important;
-  font-weight: bold !important;
+  font-size: 16px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   cursor: pointer !important;
-  z-index: 99999999 !important;
   box-shadow: 0 4px 10px rgba(0,0,0,0.4) !important;
   padding: 0 !important;
   line-height: 1 !important;
   pointer-events: auto !important;
   transition: transform 0.1s !important;
 }
+
+#zen-mobile-settings-btn:active {
+  transform: scale(0.9) !important;
+}
+
+#zen-mobile-actions-menu {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  background: #27272a !important;
+  padding: 8px !important;
+  border-radius: 12px !important;
+  border: 1px solid #555 !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
+}
+
+#zen-mobile-actions-menu.zen-hidden {
+  display: none !important;
+}
+
+#zen-mobile-action-copy,
+#zen-mobile-action-delete {
+  color: white !important;
+  border: none !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: bold !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#zen-mobile-action-copy { background: #10b981 !important; }
+#zen-mobile-action-delete { background: #ef4444 !important; }
 
 /* History Tools */
 #zen-mobile-history {

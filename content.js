@@ -539,26 +539,41 @@ if (typeof window.zenIsActive === 'undefined') {
     // Ignore UI elements
     if (e.target.closest('#zen-theme-btn') || e.target.closest('#zen-snipper-reset') || e.target.closest('#zen-theme-menu') || e.target.closest('#zen-scratchpad') || e.target.closest('#zen-mobile-history') || e.target.closest('#zen-focus-timer') || e.target.closest('#zen-toast')) return;
 
-    // Tap the Minus / Copy Button
-    if (e.target.id === 'zen-mobile-delete-btn' || e.target.closest('#zen-mobile-delete-btn')) {
+    const actionGroup = e.target.closest('#zen-mobile-action-group');
+    if (actionGroup) {
       e.preventDefault();
       e.stopPropagation();
-      if (mobileEraseTarget) {
-         if (window.zenIsCopying) {
-           copySmartElement(mobileEraseTarget);
-           showToast("✅ Copied block to clipboard!", 2000);
-         } else {
-           mobileEraseTarget.classList.add('zen-hidden');
-           window.zenDeletedStack.push(mobileEraseTarget);
-           window.zenRedoStack = [];
-           updateHistoryButtons();
-         }
+      
+      if (e.target.closest('#zen-mobile-settings-btn')) {
+        const menu = document.getElementById('zen-mobile-actions-menu');
+        if (menu) menu.classList.toggle('zen-hidden');
+        return;
       }
-      clearMobileErase();
+      
+      if (e.target.closest('#zen-mobile-action-copy')) {
+        if (mobileEraseTarget) {
+          copySmartElement(mobileEraseTarget);
+          showToast("✅ Copied block to clipboard!", 2000);
+        }
+        clearMobileErase();
+        return;
+      }
+      
+      if (e.target.closest('#zen-mobile-action-delete')) {
+        if (mobileEraseTarget) {
+          mobileEraseTarget.classList.add('zen-hidden');
+          window.zenDeletedStack.push(mobileEraseTarget);
+          window.zenRedoStack = [];
+          updateHistoryButtons();
+        }
+        clearMobileErase();
+        return;
+      }
+      
       return;
     }
-
-    // Tap a block to highlight it for deletion / copy
+    
+    // Tap a block to highlight it
     if (e.target.closest('.zen-isolated-element')) {
       clearMobileErase();
 
@@ -566,25 +581,37 @@ if (typeof window.zenIsActive === 'undefined') {
       if (target.nodeType === 3) target = target.parentNode;
 
       mobileEraseTarget = target;
+      target.classList.add('zen-mobile-action-box');
 
-      const btn = document.createElement('button');
-      btn.id = 'zen-mobile-delete-btn';
+      const btnGroup = document.createElement('div');
+      btnGroup.id = 'zen-mobile-action-group';
 
-      if (window.zenIsCopying) {
-        target.classList.add('zen-mobile-copy-box');
-        btn.innerHTML = '📋';
-        btn.style.background = '#10b981';
-        btn.style.borderColor = '#10b981';
-      } else {
-        target.classList.add('zen-mobile-erase-box');
-        btn.innerHTML = '−';
-      }
+      const settingsBtn = document.createElement('button');
+      settingsBtn.id = 'zen-mobile-settings-btn';
+      settingsBtn.innerHTML = '⚙️';
 
-      document.body.appendChild(btn);
+      const actionsMenu = document.createElement('div');
+      actionsMenu.id = 'zen-mobile-actions-menu';
+      actionsMenu.classList.add('zen-hidden');
+
+      const copyBtn = document.createElement('button');
+      copyBtn.id = 'zen-mobile-action-copy';
+      copyBtn.innerHTML = '📋 Copy';
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.id = 'zen-mobile-action-delete';
+      deleteBtn.innerHTML = '🗑️ Delete';
+
+      actionsMenu.appendChild(copyBtn);
+      actionsMenu.appendChild(deleteBtn);
+
+      btnGroup.appendChild(settingsBtn);
+      btnGroup.appendChild(actionsMenu);
+      document.body.appendChild(btnGroup);
 
       const rect = target.getBoundingClientRect();
-      btn.style.top = (rect.top - 15) + 'px';
-      btn.style.left = (rect.right - 15) + 'px';
+      btnGroup.style.top = (rect.top - 15) + 'px';
+      btnGroup.style.left = (rect.right - 25) + 'px';
 
       // Update position on scroll
       window.addEventListener('scroll', updateMobileEraseBtnPosition, true);
@@ -594,18 +621,17 @@ if (typeof window.zenIsActive === 'undefined') {
   }
 
   function updateMobileEraseBtnPosition() {
-    const btn = document.getElementById('zen-mobile-delete-btn');
+    const btn = document.getElementById('zen-mobile-action-group');
     if (!btn || !mobileEraseTarget) return;
     const rect = mobileEraseTarget.getBoundingClientRect();
     btn.style.top = (rect.top - 15) + 'px';
-    btn.style.left = (rect.right - 15) + 'px';
+    btn.style.left = (rect.right - 25) + 'px';
   }
 
   function clearMobileErase() {
     window.removeEventListener('scroll', updateMobileEraseBtnPosition, true);
-    document.querySelectorAll('.zen-mobile-erase-box').forEach(el => el.classList.remove('zen-mobile-erase-box'));
-    document.querySelectorAll('.zen-mobile-copy-box').forEach(el => el.classList.remove('zen-mobile-copy-box'));
-    const btn = document.getElementById('zen-mobile-delete-btn');
+    document.querySelectorAll('.zen-mobile-action-box').forEach(el => el.classList.remove('zen-mobile-action-box'));
+    const btn = document.getElementById('zen-mobile-action-group');
     if (btn) btn.remove();
     mobileEraseTarget = null;
   }
