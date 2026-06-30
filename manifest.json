@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Zen Math Snipper",
-  "version": "1.0",
+  "version": "2.0",
   "description": "Isolate GATE questions and math blocks with custom zen styling.",
   "author": "Harsha",
   "browser_specific_settings": {

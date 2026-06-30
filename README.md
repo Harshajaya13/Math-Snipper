@@ -53,7 +53,13 @@ All shortcuts are strictly sandboxed. They are **only** available while Zen Mode
 
 ## 🚀 Installation Guide
 
-### 1️⃣ Zen Browser & Firefox (Recommended)
+### 1️⃣ Firefox Add-ons Store (Easiest)
+You can install the official, verified version directly from the Mozilla Add-ons store.
+1. Go to the Mozilla Add-ons Store.
+2. Search for **"Zen Math Snipper"**.
+3. Click **"Add to Firefox"**.
+
+### 2️⃣ Zen Browser & Firefox (Local Developer Mode)
 Our extension uses strict, modern **Manifest V3** security rules. 
 
 1. Type `about:debugging#/runtime/this-firefox` into your URL bar.
@@ -66,7 +72,7 @@ Our extension uses strict, modern **Manifest V3** security rules.
    - Go to the **Permissions** tab.
    - Toggle **"Access your data for all websites"** to **ON**.
 
-### 2️⃣ Google Chrome / Brave / Edge
+### 3️⃣ Google Chrome / Brave / Edge
 1. Navigate to your browser's extension dashboard (e.g. `chrome://extensions/`).
 2. Toggle **"Developer mode"** ON.
 3. Click the **"Load unpacked"** button.
@@ -74,15 +80,15 @@ Our extension uses strict, modern **Manifest V3** security rules.
 
 *(Note: Since Chromium browsers use Service Workers instead of background scripts, you may need to open `manifest.json` and change `"scripts": ["background.js"]` to `"service_worker": "background.js"` if you experience background script errors).*
 
-### 3️⃣ Iceraven (Android/Mobile)
+### 4️⃣ Iceraven (Android/Mobile)
 Because standard Firefox for Android blocks custom extensions, we recommend **Iceraven**, a developer-friendly fork that supports `.xpi` extensions directly:
-1. Transfer the `zen_math_snipper-1.0.xpi` file to your Android phone.
+1. Transfer the `zen_math_snipper-v2.0.xpi` file to your Android phone.
 2. Open **Iceraven** and type `about:config` in the URL bar.
 3. Search for `xpinstall.signatures.required` and toggle it to **`false`**.
 4. Now, type `file:///` in the URL bar and navigate to where you saved the `.xpi` file (e.g. `file:///storage/emulated/0/Download/`).
 5. Tap the `.xpi` file to instantly install Zen Math Snipper!
 
-### 4️⃣ Apple Safari
+### 5️⃣ Apple Safari
 Because Safari uses native macOS app packaging for extensions:
 1. Open your terminal and run Apple's command-line converter:
    `xcrun safari-web-extension-converter /path/to/zen-extension`
