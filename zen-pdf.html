@@ -85,6 +85,7 @@
           <button class="btn btn-secondary" id="modal-clean-btn" title="Annihilate background GATE logo watermark (W)">💧 Remove Watermark</button>
           <button class="btn btn-secondary" id="modal-invert-btn" title="Toggle Dark Mode (I)">🌓 Invert Theme</button>
           <button class="btn btn-primary" id="modal-copy-text-btn" title="Copy raw question text from PDF (T)">📋 Copy Text</button>
+          <button class="btn btn-primary" id="modal-copy-latex-btn" title="Copy formatted LaTeX Math equation text (L)">🔣 Copy LaTeX</button>
           <button class="btn btn-primary" id="modal-copy-btn" title="Copy question image (C)">🖼️ Copy Image</button>
           <select id="modal-width-select" class="btn btn-secondary" title="Modal Width Percentage">
             <option value="60%">Width: 60%</option>
@@ -101,19 +102,36 @@
     </div>
   </div>
 
-  <!-- Floating Scratch Notepad Modal -->
-  <div id="scratchpad-modal" class="modal-overlay" style="display: none;">
-    <div class="scratchpad-card">
+  <!-- Floating Scratch Notepad Panel (Sits on right side beside question) -->
+  <div id="scratchpad-modal" class="floating-side-panel" style="display: none;">
+    <div class="scratchpad-card" id="scratchpad-header-handle">
       <div class="modal-header">
-        <span>📝 GATE Rough Scratch Notepad</span>
+        <span>📝 GATE Rough Scratchpad & LaTeX</span>
         <div class="modal-actions">
+          <button class="btn btn-secondary" id="scratch-preview-btn" title="Toggle Live Math Preview">👁️ Preview</button>
           <button class="btn btn-secondary" id="scratch-clear-btn">🧹 Clear</button>
-          <button class="btn btn-primary" id="scratch-copy-btn">📋 Copy Notes</button>
-          <button class="btn btn-primary" id="scratch-download-btn">💾 Download (.txt)</button>
+          <button class="btn btn-primary" id="scratch-copy-btn">📋 Copy</button>
+          <button class="btn btn-primary" id="scratch-download-btn">💾 Save</button>
+          <button class="btn btn-primary" id="scratch-upload-btn">📂 Open</button>
+          <input type="file" id="scratch-upload-input" accept=".txt" style="display: none;">
           <button class="btn btn-icon" id="scratch-close-btn">✕</button>
         </div>
       </div>
-      <textarea id="scratchpad-textarea" placeholder="Type your rough calculation notes, solution steps, or formulas here..."></textarea>
+      <div class="scratch-latex-bar">
+        <button class="btn btn-xs latex-insert-btn" data-latex=" / ">A/B Fraction</button>
+        <button class="btn btn-xs latex-insert-btn" data-latex="√">√ Root</button>
+        <button class="btn btn-xs latex-insert-btn" data-latex="≤">≤</button>
+        <button class="btn btn-xs latex-insert-btn" data-latex="≥">≥</button>
+        <button class="btn btn-xs latex-insert-btn" data-latex="α">α</button>
+        <button class="btn btn-xs latex-insert-btn" data-latex="β">β</button>
+        <button class="btn btn-xs latex-insert-btn" data-latex="∫">∫</button>
+        <button class="btn btn-xs latex-insert-btn" data-latex="θ">θ</button>
+        <button class="btn btn-xs latex-insert-btn" data-latex="π">π</button>
+        <button class="btn btn-xs latex-insert-btn" data-latex="±">±</button>
+        <button class="btn btn-xs latex-insert-btn" data-latex="∞">∞</button>
+      </div>
+      <textarea id="scratchpad-textarea" placeholder="Type your rough calculation notes, equations, or solution steps here..."></textarea>
+      <div id="scratchpad-preview" class="scratch-preview-box" style="display: none;"></div>
     </div>
   </div>
 

@@ -27,3 +27,20 @@ chrome.action.onClicked.addListener((tab) => {
     });
   });
 });
+
+chrome.commands.onCommand.addListener((command) => {
+  if (command === "open-pdf-studio") {
+    chrome.tabs.create({
+      url: chrome.runtime.getURL("zen-pdf.html")
+    });
+  }
+});
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "open_pdf_studio") {
+    chrome.tabs.create({
+      url: chrome.runtime.getURL("zen-pdf.html")
+    });
+    sendResponse({ success: true });
+  }
+});

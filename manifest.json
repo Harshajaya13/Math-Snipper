@@ -32,6 +32,13 @@
         "mac": "Alt+M"
       },
       "description": "Activate Zen Snipper"
+    },
+    "open-pdf-studio": {
+      "suggested_key": {
+        "default": "Alt+P",
+        "mac": "Alt+P"
+      },
+      "description": "Open Zen GATE PDF Studio"
     }
   },
   "web_accessible_resources": [

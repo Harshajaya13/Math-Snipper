@@ -349,6 +349,7 @@ document.getElementById('modal-copy-text-btn').addEventListener('click', functio
       });
 
       let text = formattedLines.filter(l => l.length > 0).join('\n');
+      text = text.replace(/[^\x20-\x7E\n\r\t\u00A0-\u024F\u0370-\u03FF\u2200-\u22FF]/g, '');
       if (!text) {
         showToast("No selectable text found in crop region.");
         return;
@@ -391,6 +392,7 @@ document.getElementById('modal-width-select').addEventListener('change', functio
 const scratchpadModal = document.getElementById('scratchpad-modal');
 const shortcutsModal = document.getElementById('shortcuts-modal');
 const scratchTextarea = document.getElementById('scratchpad-textarea');
+const scratchPreviewBox = document.getElementById('scratchpad-preview');
 
 function toggleScratchpad() {
   const isVisible = scratchpadModal.style.display === 'flex';
@@ -404,9 +406,46 @@ document.getElementById('scratch-close-btn').addEventListener('click', () => {
   scratchpadModal.style.display = 'none';
 });
 
+// Live Math Preview Toggle
+document.getElementById('scratch-preview-btn').addEventListener('click', function() {
+  if (!scratchTextarea || !scratchPreviewBox) return;
+  const isPreviewing = scratchPreviewBox.style.display === 'block';
+
+  if (!isPreviewing) {
+    // Render LaTeX / Math format
+    let raw = scratchTextarea.value;
+    // Format fractions \frac{a}{b}
+    raw = raw.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '<span class="math-frac"><span class="math-frac-top">$1</span><span class="math-frac-bot">$2</span></span>');
+    // Format math blocks $$ ... $$ or $ ... $
+    raw = raw.replace(/\$\$([^\$]+)\$\$/g, '<div class="math-formula">$1</div>');
+    raw = raw.replace(/\$([^\$]+)\$/g, '<code style="color:#c4b5fd;">$1</code>');
+    // Format common LaTeX symbols
+    raw = raw
+      .replace(/\\le/g, '≤')
+      .replace(/\\ge/g, '≥')
+      .replace(/\\alpha/g, 'α')
+      .replace(/\\beta/g, 'β')
+      .replace(/\\int/g, '∫')
+      .replace(/\\times/g, '×');
+
+    scratchPreviewBox.innerHTML = raw.replace(/\n/g, '<br>') || '<i>No notes to preview yet...</i>';
+    scratchTextarea.style.display = 'none';
+    scratchPreviewBox.style.display = 'block';
+    this.textContent = '✏️ Edit Notes';
+    showToast("Live Math Preview mode active!");
+  } else {
+    scratchPreviewBox.style.display = 'none';
+    scratchTextarea.style.display = 'block';
+    scratchTextarea.focus();
+    this.textContent = '👁️ Preview';
+    showToast("Edit mode active.");
+  }
+});
+
 document.getElementById('scratch-clear-btn').addEventListener('click', () => {
   if (scratchTextarea) {
     scratchTextarea.value = '';
+    if (scratchPreviewBox) scratchPreviewBox.innerHTML = '';
     showToast("Scratchpad cleared!");
   }
 });
@@ -431,6 +470,87 @@ document.getElementById('scratch-download-btn').addEventListener('click', () => 
   showToast("Downloaded GATE rough notes!");
 });
 
+const uploadInput = document.getElementById('scratch-upload-input');
+document.getElementById('scratch-upload-btn').addEventListener('click', () => {
+  if (uploadInput) uploadInput.click();
+});
+
+if (uploadInput) {
+  uploadInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      if (scratchTextarea) {
+        scratchTextarea.value = evt.target.result;
+        showToast("Loaded saved GATE rough notes!");
+      }
+    };
+    reader.readAsText(file);
+  });
+}
+
+// Copy LaTeX Math formatted question text
+document.getElementById('modal-copy-latex-btn').addEventListener('click', function() {
+  if (!pdfDoc || !lastCropRect) return;
+  pdfDoc.getPage(pageNum).then(page => {
+    const viewport = page.getViewport({ scale: scale });
+    return page.getTextContent().then(textContent => {
+      const items = [];
+      textContent.items.forEach(item => {
+        const pt = viewport.convertToViewportPoint(item.transform[4], item.transform[5]);
+        if (pt[0] >= lastCropRect.x - 15 && pt[0] <= lastCropRect.x + lastCropRect.w + 15 &&
+            pt[1] >= lastCropRect.y - 25 && pt[1] <= lastCropRect.y + lastCropRect.h + 25) {
+          items.push({ str: item.str, x: pt[0], y: pt[1] });
+        }
+      });
+
+      items.sort((a, b) => a.y - b.y);
+      const rows = [];
+      items.forEach(item => {
+        let added = false;
+        for (let row of rows) {
+          if (Math.abs(row[0].y - item.y) < 6) {
+            row.push(item);
+            added = true;
+            break;
+          }
+        }
+        if (!added) rows.push([item]);
+      });
+
+      const formattedLines = rows.map(row => {
+        row.sort((a, b) => a.x - b.x);
+        return row.map(i => i.str).join(' ').replace(/\s+/g, ' ').trim();
+      });
+
+      let text = formattedLines.filter(l => l.length > 0).join('\n');
+      text = text.replace(/[^\x20-\x7E\n\r\t\u00A0-\u024F\u0370-\u03FF\u2200-\u22FF]/g, '');
+      if (!text) {
+        showToast("No selectable text found.");
+        return;
+      }
+
+      // Convert common math notations to LaTeX formatting
+      text = text
+        .replace(/≤/g, '\\le ')
+        .replace(/≥/g, '\\ge ')
+        .replace(/α/g, '\\alpha ')
+        .replace(/β/g, '\\beta ')
+        .replace(/∫/g, '\\int ')
+        .replace(/×/g, '\\times ');
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text)
+          .then(() => showToast("Copied formatted LaTeX math equation text!"))
+          .catch(() => showToast("Failed to copy LaTeX."));
+      } else {
+        showToast("Copied LaTeX!");
+      }
+    });
+  });
+});
+
 // Shortcuts Modal
 document.getElementById('open-shortcuts-btn').addEventListener('click', () => {
   shortcutsModal.style.display = 'flex';
@@ -438,6 +558,44 @@ document.getElementById('open-shortcuts-btn').addEventListener('click', () => {
 document.getElementById('shortcuts-close-btn').addEventListener('click', () => {
   shortcutsModal.style.display = 'none';
 });
+
+// LaTeX quick insert buttons
+document.querySelectorAll('.latex-insert-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    if (!scratchTextarea) return;
+    const insert = this.getAttribute('data-latex') || '';
+    const start = scratchTextarea.selectionStart || scratchTextarea.value.length;
+    const end = scratchTextarea.selectionEnd || scratchTextarea.value.length;
+    scratchTextarea.value = scratchTextarea.value.substring(0, start) + insert + scratchTextarea.value.substring(end);
+    scratchTextarea.focus();
+  });
+});
+
+// Draggable Scratchpad Panel
+let isDraggingScratchpad = false;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+const scratchHeader = document.getElementById('scratchpad-header-handle');
+
+if (scratchHeader) {
+  scratchHeader.style.cursor = 'move';
+  scratchHeader.addEventListener('mousedown', function(e) {
+    if (['BUTTON', 'TEXTAREA'].includes(e.target.tagName)) return;
+    isDraggingScratchpad = true;
+    const rect = scratchpadModal.getBoundingClientRect();
+    dragOffsetX = e.clientX - rect.left;
+    dragOffsetY = e.clientY - rect.top;
+  });
+  window.addEventListener('mousemove', function(e) {
+    if (!isDraggingScratchpad) return;
+    scratchpadModal.style.left = (e.clientX - dragOffsetX) + 'px';
+    scratchpadModal.style.top = (e.clientY - dragOffsetY) + 'px';
+    scratchpadModal.style.right = 'auto';
+  });
+  window.addEventListener('mouseup', function() {
+    isDraggingScratchpad = false;
+  });
+}
 
 // Full Peak Keyboard Shortcuts
 window.addEventListener('keydown', function(e) {
@@ -473,6 +631,8 @@ window.addEventListener('keydown', function(e) {
       document.getElementById('modal-copy-btn').click();
     } else if (e.key.toLowerCase() === 't') {
       document.getElementById('modal-copy-text-btn').click();
+    } else if (e.key.toLowerCase() === 'l') {
+      document.getElementById('modal-copy-latex-btn').click();
     }
   } else {
     if (e.key === 'ArrowLeft') {

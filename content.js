@@ -154,8 +154,36 @@ if (typeof window.zenIsActive === 'undefined') {
     clearBtn.style.cursor = 'pointer';
     clearBtn.style.fontSize = '12px';
 
+    const saveBtn = document.createElement('button');
+    saveBtn.innerText = '💾 Save';
+    saveBtn.style.background = 'none';
+    saveBtn.style.border = '1px solid currentColor';
+    saveBtn.style.color = '#38bdf8';
+    saveBtn.style.borderRadius = '4px';
+    saveBtn.style.padding = '2px 8px';
+    saveBtn.style.cursor = 'pointer';
+    saveBtn.style.fontSize = '12px';
+
+    const openBtn = document.createElement('button');
+    openBtn.innerText = '📂 Open';
+    openBtn.style.background = 'none';
+    openBtn.style.border = '1px solid currentColor';
+    openBtn.style.color = '#a78bfa';
+    openBtn.style.borderRadius = '4px';
+    openBtn.style.padding = '2px 8px';
+    openBtn.style.cursor = 'pointer';
+    openBtn.style.fontSize = '12px';
+
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'file';
+    hiddenInput.accept = '.txt';
+    hiddenInput.style.display = 'none';
+
     btnContainer.appendChild(previewBtn);
+    btnContainer.appendChild(saveBtn);
+    btnContainer.appendChild(openBtn);
     btnContainer.appendChild(clearBtn);
+    btnContainer.appendChild(hiddenInput);
     titleDiv.appendChild(btnContainer);
 
     const textarea = document.createElement('div');
@@ -184,6 +212,31 @@ if (typeof window.zenIsActive === 'undefined') {
         localStorage.removeItem('zen_scratchpad_content');
         if (previewDiv.style.display === 'block') previewBtn.click(); // switch back to edit
       }
+    };
+
+    saveBtn.onclick = () => {
+      const blob = new Blob([textarea.innerText || textarea.textContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Zen_HTML_Scratch_Notes.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    openBtn.onclick = () => {
+      hiddenInput.click();
+    };
+
+    hiddenInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        textarea.innerText = evt.target.result;
+        localStorage.setItem('zen_scratchpad_content', textarea.innerHTML);
+      };
+      reader.readAsText(file);
     };
 
     previewBtn.onclick = () => {
@@ -352,6 +405,14 @@ if (typeof window.zenIsActive === 'undefined') {
   }, true);
 
   document.addEventListener('keydown', (e) => {
+    if (e.altKey && e.key.toLowerCase() === 'p') {
+      e.preventDefault();
+      try {
+        chrome.runtime.sendMessage({ action: "open_pdf_studio" });
+      } catch (err) {}
+      return;
+    }
+
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable || e.isComposing) return;
 
     // Undo/Redo with Ctrl+Z / Ctrl+Y
