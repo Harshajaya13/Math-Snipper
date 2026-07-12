@@ -235,6 +235,59 @@ canvasContainer.addEventListener('mouseup', function(e) {
   isolateCrop(left, top, width, height);
 });
 
+// Mobile Touchscreen Support for Android / Tablets
+canvasContainer.addEventListener('touchstart', function(e) {
+  if (e.touches.length !== 1) return;
+  const touch = e.touches[0];
+  const rect = canvasContainer.getBoundingClientRect();
+  cropStartX = touch.clientX - rect.left;
+  cropStartY = touch.clientY - rect.top;
+  isDraggingCrop = true;
+  cropMarquee.style.display = 'block';
+  cropMarquee.style.left = cropStartX + 'px';
+  cropMarquee.style.top = cropStartY + 'px';
+  cropMarquee.style.width = '0px';
+  cropMarquee.style.height = '0px';
+}, { passive: true });
+
+canvasContainer.addEventListener('touchmove', function(e) {
+  if (!isDraggingCrop || e.touches.length !== 1) return;
+  const touch = e.touches[0];
+  const rect = canvasContainer.getBoundingClientRect();
+  const curX = touch.clientX - rect.left;
+  const curY = touch.clientY - rect.top;
+
+  const left = Math.min(cropStartX, curX);
+  const top = Math.min(cropStartY, curY);
+  const width = Math.abs(curX - cropStartX);
+  const height = Math.abs(curY - cropStartY);
+
+  cropMarquee.style.left = left + 'px';
+  cropMarquee.style.top = top + 'px';
+  cropMarquee.style.width = width + 'px';
+  cropMarquee.style.height = height + 'px';
+  cropBadge.textContent = `${Math.round(width)} × ${Math.round(height)} px`;
+}, { passive: true });
+
+canvasContainer.addEventListener('touchend', function(e) {
+  if (!isDraggingCrop) return;
+  isDraggingCrop = false;
+  cropMarquee.style.display = 'none';
+
+  const touch = e.changedTouches[0];
+  const rect = canvasContainer.getBoundingClientRect();
+  const curX = touch.clientX - rect.left;
+  const curY = touch.clientY - rect.top;
+
+  const left = Math.min(cropStartX, curX);
+  const top = Math.min(cropStartY, curY);
+  const width = Math.abs(curX - cropStartX);
+  const height = Math.abs(curY - cropStartY);
+
+  if (width < 20 || height < 20) return;
+  isolateCrop(left, top, width, height);
+});
+
 function isolateCrop(x, y, w, h) {
   lastCropRect = { x, y, w, h };
   const tempCanvas = document.createElement('canvas');
@@ -412,23 +465,49 @@ document.getElementById('scratch-preview-btn').addEventListener('click', functio
   const isPreviewing = scratchPreviewBox.style.display === 'block';
 
   if (!isPreviewing) {
-    // Render LaTeX / Math format
-    let raw = scratchTextarea.value;
-    // Format fractions \frac{a}{b}
-    raw = raw.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '<span class="math-frac"><span class="math-frac-top">$1</span><span class="math-frac-bot">$2</span></span>');
-    // Format math blocks $$ ... $$ or $ ... $
-    raw = raw.replace(/\$\$([^\$]+)\$\$/g, '<div class="math-formula">$1</div>');
-    raw = raw.replace(/\$([^\$]+)\$/g, '<code style="color:#c4b5fd;">$1</code>');
-    // Format common LaTeX symbols
-    raw = raw
-      .replace(/\\le/g, '≤')
-      .replace(/\\ge/g, '≥')
-      .replace(/\\alpha/g, 'α')
-      .replace(/\\beta/g, 'β')
-      .replace(/\\int/g, '∫')
-      .replace(/\\times/g, '×');
+    let raw = scratchTextarea.value || '';
+    if (!raw.trim()) {
+      scratchPreviewBox.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:40px;"><i>No notes to preview yet. Type notes or copy question text!</i></div>';
+    } else {
+      // Escape HTML entities
+      let lines = raw.split('\n');
+      let htmlLines = lines.map(line => {
+        let l = line.trim();
+        if (!l) return '<div style="height:8px;"></div>';
 
-    scratchPreviewBox.innerHTML = raw.replace(/\n/g, '<br>') || '<i>No notes to preview yet...</i>';
+        // Highlight Q. titles
+        if (/^Q\.\s*\d+/i.test(l) || /^Question\s*\d+/i.test(l)) {
+          return `<div class="preview-q-header">${l}</div>`;
+        }
+        // Highlight options (A) (B) (C) (D)
+        if (/^\([A-D]\)/.test(l)) {
+          return `<div class="preview-option">${l}</div>`;
+        }
+
+        // Convert LaTeX fractions \frac{a}{b}
+        l = l.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '<span class="math-frac"><span class="math-frac-top">$1</span><span class="math-frac-bot">$2</span></span>');
+        // Convert powers x^2 or e^{-x}
+        l = l.replace(/\^\{([^}]+)\}/g, '<sup>$1</sup>');
+        l = l.replace(/\^([0-9a-zA-Z]+)/g, '<sup>$1</sup>');
+        // Convert subscripts x_2 or F_X
+        l = l.replace(/_\{([^}]+)\}/g, '<sub>$1</sub>');
+        l = l.replace(/_([0-9a-zA-Z]+)/g, '<sub>$1</sub>');
+
+        // Convert common symbols
+        l = l
+          .replace(/\\le/g, '≤')
+          .replace(/\\ge/g, '≥')
+          .replace(/\\alpha/g, 'α')
+          .replace(/\\beta/g, 'β')
+          .replace(/\\int/g, '∫')
+          .replace(/\\times/g, '×');
+
+        return `<div class="preview-line">${l}</div>`;
+      });
+
+      scratchPreviewBox.innerHTML = htmlLines.join('');
+    }
+
     scratchTextarea.style.display = 'none';
     scratchPreviewBox.style.display = 'block';
     this.textContent = '✏️ Edit Notes';
