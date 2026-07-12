@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Zen Math Snipper",
-  "version": "2.0",
-  "description": "Isolate GATE questions and math blocks with custom zen styling.",
+  "version": "3.0",
+  "description": "Isolate GATE questions, PDF regions, and math blocks with custom zen styling.",
   "author": "Harsha",
   "browser_specific_settings": {
     "gecko": {
@@ -33,5 +33,11 @@
       },
       "description": "Activate Zen Snipper"
     }
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["zen-pdf.html", "zen-pdf.js", "zen-pdf.css", "lib/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

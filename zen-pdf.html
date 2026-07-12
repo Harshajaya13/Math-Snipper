@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🧘 Zen GATE PDF Studio</title>
+  <link rel="stylesheet" href="zen-pdf.css">
+</head>
+<body class="theme-oled">
+  <header id="zen-pdf-header">
+    <div class="logo-area">
+      <span class="logo-icon">🧘</span>
+      <span class="logo-title">Zen GATE PDF Studio</span>
+      <span class="logo-badge">v3.0</span>
+    </div>
+
+    <div class="toolbar-center">
+      <label class="btn btn-primary" id="open-file-btn">
+        <span>📁 Open GATE PDF</span>
+        <input type="file" id="pdf-file-input" accept=".pdf" hidden>
+      </label>
+
+      <div class="nav-controls" id="nav-controls" style="display: none;">
+        <button class="btn btn-icon" id="prev-page" title="Previous Page">◀</button>
+        <span class="page-info">
+          Page <input type="number" id="page-num-input" value="1" min="1"> of <span id="page-count">1</span>
+        </span>
+        <button class="btn btn-icon" id="next-page" title="Next Page">▶</button>
+      </div>
+
+      <div class="zoom-controls" id="zoom-controls" style="display: none;">
+        <button class="btn btn-icon" id="zoom-out" title="Zoom Out">−</button>
+        <span class="zoom-input-wrapper">
+          <input type="number" id="zoom-input" value="150" min="30" max="500" step="10"><span>%</span>
+        </span>
+        <button class="btn btn-icon" id="zoom-in" title="Zoom In">+</button>
+        <button class="btn btn-secondary" id="zoom-fit">Fit Width</button>
+      </div>
+    </div>
+
+    <div class="toolbar-right">
+      <button class="btn btn-secondary" id="toggle-scratchpad-btn" title="Open GATE Scratch Notepad (Press S)">
+        📝 Scratch Pad
+      </button>
+      <button class="btn btn-secondary" id="open-shortcuts-btn" title="Keyboard Shortcuts Guide (Press ?)">
+        ⌨️ Shortcuts
+      </button>
+      <button class="btn btn-toggle" id="toggle-invert-btn" title="Convert white exam papers to OLED Dark">
+        🌓 OLED Invert
+      </button>
+      <div class="crop-status-badge">
+        ✂️ Drag & Crop Active
+      </div>
+    </div>
+  </header>
+
+  <main id="pdf-viewport">
+    <div id="drop-zone">
+      <div class="drop-card">
+        <div class="drop-icon">📄</div>
+        <h2>Drop GATE Exam PDF Here</h2>
+        <p>Or click <b>Open GATE PDF</b> above to load any past paper question book.</p>
+        <div class="feature-pills">
+          <span>✨ Click & Drag to Crop Questions</span>
+          <span>💧 GATE Watermark Annihilator</span>
+          <span>📝 Rough Scratch Notepad (S)</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="canvas-container" style="display: none;">
+      <canvas id="pdf-canvas"></canvas>
+      <div id="crop-marquee" style="display: none;">
+        <div id="crop-badge"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Centered Cropped Question Modal -->
+  <div id="crop-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-card" id="modal-card">
+      <div class="modal-header">
+        <span>🧘 Isolated GATE Question Focus</span>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="modal-scratch-btn" title="Open Scratchpad alongside question (S)">📝 Scratchpad</button>
+          <button class="btn btn-secondary" id="modal-clean-btn" title="Annihilate background GATE logo watermark (W)">💧 Remove Watermark</button>
+          <button class="btn btn-secondary" id="modal-invert-btn" title="Toggle Dark Mode (I)">🌓 Invert Theme</button>
+          <button class="btn btn-primary" id="modal-copy-text-btn" title="Copy raw question text from PDF (T)">📋 Copy Text</button>
+          <button class="btn btn-primary" id="modal-copy-btn" title="Copy question image (C)">🖼️ Copy Image</button>
+          <select id="modal-width-select" class="btn btn-secondary" title="Modal Width Percentage">
+            <option value="60%">Width: 60%</option>
+            <option value="75%">Width: 75%</option>
+            <option value="90%" selected>Width: 90%</option>
+            <option value="100%">Width: 100%</option>
+          </select>
+          <button class="btn btn-icon" id="modal-close-btn" title="Close (Esc or Q)">✕</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <img id="cropped-img" src="" alt="Cropped GATE Question">
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Scratch Notepad Modal -->
+  <div id="scratchpad-modal" class="modal-overlay" style="display: none;">
+    <div class="scratchpad-card">
+      <div class="modal-header">
+        <span>📝 GATE Rough Scratch Notepad</span>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="scratch-clear-btn">🧹 Clear</button>
+          <button class="btn btn-primary" id="scratch-copy-btn">📋 Copy Notes</button>
+          <button class="btn btn-primary" id="scratch-download-btn">💾 Download (.txt)</button>
+          <button class="btn btn-icon" id="scratch-close-btn">✕</button>
+        </div>
+      </div>
+      <textarea id="scratchpad-textarea" placeholder="Type your rough calculation notes, solution steps, or formulas here..."></textarea>
+    </div>
+  </div>
+
+  <!-- Keyboard Shortcuts Guide Modal -->
+  <div id="shortcuts-modal" class="modal-overlay" style="display: none;">
+    <div class="shortcuts-card">
+      <div class="modal-header">
+        <span>⌨️ Zen GATE PDF Studio — Peak Shortcuts</span>
+        <button class="btn btn-icon" id="shortcuts-close-btn">✕</button>
+      </div>
+      <div class="shortcuts-list">
+        <div class="shortcut-row"><span>Open / Close Rough Scratchpad</span><kbd>S</kbd></div>
+        <div class="shortcut-row"><span>Toggle OLED Dark Invert Mode</span><kbd>I</kbd></div>
+        <div class="shortcut-row"><span>Remove / Restore Watermark</span><kbd>W</kbd></div>
+        <div class="shortcut-row"><span>Copy Cropped Question Image</span><kbd>C</kbd></div>
+        <div class="shortcut-row"><span>Copy Formatted Multi-Line Text</span><kbd>T</kbd></div>
+        <div class="shortcut-row"><span>Close Focus Modal Card</span><kbd>Esc / Q</kbd></div>
+        <div class="shortcut-row"><span>Previous / Next PDF Page</span><kbd>◀ / ▶ Arrows</kbd></div>
+        <div class="shortcut-row"><span>Zoom In / Zoom Out</span><kbd>+ / -</kbd></div>
+        <div class="shortcut-row"><span>Open Shortcuts Sheet</span><kbd>?</kbd></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="lib/pdf.min.js"></script>
+  <script src="zen-pdf.js"></script>
+</body>
+</html>

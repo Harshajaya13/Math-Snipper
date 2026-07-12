@@ -2,7 +2,7 @@
   <h1>🧘 Zen Focus Engine</h1>
   <p><b>An ultra-lightweight, zero-bloat study environment for GATE & STEM students.</b></p>
   
-  ![Version](https://img.shields.io/badge/version-2.0-blue.svg)
+  ![Version](https://img.shields.io/badge/version-3.0-blue.svg)
   ![License](https://img.shields.io/badge/license-MIT-green.svg)
   ![Manifest V3](https://img.shields.io/badge/Manifest-V3-purple.svg)
 </div>
@@ -11,7 +11,7 @@
 
 ## 🎯 The Vision
 
-Originally built to preserve complex math formatting (MathJax, KaTeX) while isolating GATE questions on crowded websites, **Zen Focus Engine** has evolved into a fully-fledged productivity tool. It transforms any chaotic webpage into a pristine, beautifully themed study environment in a single click.
+Originally built to preserve complex math formatting (MathJax, KaTeX) while isolating GATE questions on crowded websites, **Zen Focus Engine** has evolved into a fully-fledged productivity tool. It transforms any chaotic webpage or **PDF document** into a pristine, beautifully themed study environment in a single click.
 
 No bloat. No tracking. Pure focus.
 
@@ -20,6 +20,8 @@ No bloat. No tracking. Pure focus.
 ## ✨ Key Features
 
 * 🥷 **God-Mode Isolation:** Click any block to instantly hide everything else on the page. SVG/MathML math rendering is left 100% perfectly intact.
+* ✂️ **NEW: Drag & Crop Region Snipper (PDF Support):** Click & drag a bounding box around any question on a PDF page or website to crop and extract that exact region into a centered Zen Focus Card!
+* 🌓 **NEW: PDF OLED Invert Mode:** One-click toggle (`Invert Colors`) on cropped PDF questions to instantly convert blinding white exam papers into OLED Dark or Midnight Blue cards!
 * 📝 **Rich-Text Scratch Pad:** A resizable, auto-saving `contenteditable` notepad. Paste rendered MathJax directly into it!
 * 👁️ **Native MathJax Bridge:** Press **P** to secretly hijack the website's native Math engine, turning your raw LaTeX notes into beautifully rendered equations right inside the Scratch Pad.
 * 🎨 **Material Glassmorphism Themes:** Choose between 4 gorgeous hand-crafted UI themes (*OLED Dark, Midnight Blue, Paper Light, Hacker Matrix*).
@@ -36,8 +38,9 @@ All shortcuts are strictly sandboxed. They are **only** available while Zen Mode
 
 | Action | Shortcut / Input | Description |
 |--------|------------------|-------------|
-| **Start Snipper** | `Alt + M` | Activates hover mode. Move your mouse to highlight blocks to isolate. |
+| **Start Snipper** | `Alt + M` | Activates hover mode. Move your mouse to highlight blocks to isolate, or click & drag to crop a PDF region. |
 | **Isolate Block** | `Left-Click` | Snipes the highlighted block, transforming it into a premium card. |
+| **Crop PDF / Region** | `Click + Drag` | Draws a marquee bounding box around any region/PDF question to crop it into a Zen Focus Card. |
 | **Ultra-Focus Mode** | `Tab` | Instantly hides the entire HUD (Timer, Menus, Modals) so nothing is visible except the question. |
 | **Theme Menu** | `M` | Toggles the Theme & Settings Palette open or closed. |
 | **Focus Timer** | `T` | Toggles the 25-minute Pomodoro Timer. |

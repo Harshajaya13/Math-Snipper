@@ -770,3 +770,109 @@ body.zen-ultra-focus #zen-focus-timer {
     font-size: 14px !important;
   }
 }
+
+/* --- DRAG & CROP REGION SNIPPER (OPTION 1: PDF & UNIVERSAL CROP) --- */
+#zen-crop-marquee {
+  position: fixed !important;
+  border: 2px dashed #38bdf8 !important;
+  background: rgba(56, 189, 248, 0.12) !important;
+  backdrop-filter: blur(2px) !important;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45) !important;
+  z-index: 9999999 !important;
+  pointer-events: none !important;
+  border-radius: 6px !important;
+  transition: none !important;
+}
+
+#zen-crop-marquee-badge {
+  position: absolute !important;
+  bottom: -30px !important;
+  right: 0 !important;
+  background: #1e1e24 !important;
+  color: #38bdf8 !important;
+  border: 1px solid #38bdf8 !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  font-family: monospace !important;
+  font-weight: bold !important;
+  white-space: nowrap !important;
+}
+
+.zen-cropped-view-container {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 999998 !important;
+  overflow: auto !important;
+  padding: 40px !important;
+  box-sizing: border-box !important;
+}
+
+.zen-cropped-card {
+  background: rgba(26, 26, 36, 0.92) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 16px !important;
+  padding: 24px !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(16px) !important;
+  max-width: 90vw !important;
+  max-height: 85vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.zen-cropped-header {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 16px !important;
+  padding-bottom: 12px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #a78bfa !important;
+  font-family: sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+}
+
+.zen-cropped-actions {
+  display: flex !important;
+  gap: 8px !important;
+}
+
+.zen-cropped-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
+  padding: 6px 12px !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+.zen-cropped-btn:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-color: #38bdf8 !important;
+}
+
+.zen-cropped-image {
+  max-width: 100% !important;
+  max-height: 70vh !important;
+  border-radius: 8px !important;
+  object-fit: contain !important;
+  background: transparent !important;
+  transition: filter 0.3s ease !important;
+}
+
+.zen-cropped-image.zen-invert-active {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+

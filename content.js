@@ -638,21 +638,189 @@ if (typeof window.zenIsActive === 'undefined') {
 
   document.addEventListener('click', handleMobileEraseClick, true);
 
-  // --- DESKTOP HOVER LOGIC ---
+  // --- DESKTOP HOVER & REGION CROP LOGIC ---
+  let cropStartX = 0;
+  let cropStartY = 0;
+  let isDraggingCrop = false;
+  let cropMarqueeEl = null;
+
+  function handleMouseDownCrop(e) {
+    if (!window.zenIsSelecting || e.button !== 0) return;
+    cropStartX = e.clientX;
+    cropStartY = e.clientY;
+    isDraggingCrop = false;
+  }
+
+  function handleMouseMoveCrop(e) {
+    if (!window.zenIsSelecting || !(e.buttons & 1)) return;
+    const dx = Math.abs(e.clientX - cropStartX);
+    const dy = Math.abs(e.clientY - cropStartY);
+
+    if (!isDraggingCrop && (dx > 8 || dy > 8)) {
+      isDraggingCrop = true;
+      document.querySelectorAll('.zen-snipper-hover').forEach(el => el.classList.remove('zen-snipper-hover'));
+      if (!cropMarqueeEl) {
+        cropMarqueeEl = document.createElement('div');
+        cropMarqueeEl.id = 'zen-crop-marquee';
+        const badge = document.createElement('div');
+        badge.id = 'zen-crop-marquee-badge';
+        cropMarqueeEl.appendChild(badge);
+        document.body.appendChild(cropMarqueeEl);
+      }
+    }
+
+    if (isDraggingCrop && cropMarqueeEl) {
+      const left = Math.min(cropStartX, e.clientX);
+      const top = Math.min(cropStartY, e.clientY);
+      cropMarqueeEl.style.left = left + 'px';
+      cropMarqueeEl.style.top = top + 'px';
+      cropMarqueeEl.style.width = dx + 'px';
+      cropMarqueeEl.style.height = dy + 'px';
+      const badgeEl = cropMarqueeEl.querySelector('#zen-crop-marquee-badge');
+      if (badgeEl) badgeEl.textContent = `${Math.round(dx)} × ${Math.round(dy)} px`;
+    }
+  }
+
+  function handleMouseUpCrop(e) {
+    if (!window.zenIsSelecting || e.button !== 0) return;
+    if (isDraggingCrop && cropMarqueeEl) {
+      const left = Math.min(cropStartX, e.clientX);
+      const top = Math.min(cropStartY, e.clientY);
+      const width = Math.abs(e.clientX - cropStartX);
+      const height = Math.abs(e.clientY - cropStartY);
+
+      cropMarqueeEl.remove();
+      cropMarqueeEl = null;
+
+      if (width > 20 && height > 20) {
+        e.preventDefault();
+        e.stopPropagation();
+        setTimeout(() => { isDraggingCrop = false; }, 50);
+        isolateCroppedRegion({ left, top, width, height });
+        return;
+      }
+    }
+    isDraggingCrop = false;
+  }
+
+  function isolateCroppedRegion(rect) {
+    stopSelectionEvents();
+    window.zenIsActive = true;
+
+    const canvases = Array.from(document.querySelectorAll('canvas')).filter(c => {
+      const r = c.getBoundingClientRect();
+      return !(rect.left > r.right || rect.right < r.left || rect.top > r.bottom || rect.bottom < r.top);
+    });
+
+    if (canvases.length === 0) {
+      const centerEl = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      if (centerEl && centerEl !== document.body && centerEl !== document.documentElement) {
+        isolateElement(centerEl);
+        return;
+      }
+    }
+
+    const container = document.createElement('div');
+    container.className = 'zen-cropped-view-container';
+
+    const card = document.createElement('div');
+    card.className = 'zen-cropped-card';
+
+    const header = document.createElement('div');
+    header.className = 'zen-cropped-header';
+    header.innerHTML = `
+      <span>🧘 Zen Snipper — Cropped Focus</span>
+      <div class="zen-cropped-actions">
+        <button class="zen-cropped-btn" id="zen-crop-invert-btn" title="Toggle OLED Invert Mode">🌓 Invert Colors</button>
+        <button class="zen-cropped-btn" id="zen-crop-copy-btn" title="Copy Image to Clipboard">📋 Copy Snip</button>
+        <button class="zen-cropped-btn" id="zen-crop-close-btn" title="Exit Zen Mode">✕ Exit</button>
+      </div>
+    `;
+    card.appendChild(header);
+
+    let finalCanvas = document.createElement('canvas');
+    finalCanvas.width = Math.max(1, Math.round(rect.width));
+    finalCanvas.height = Math.max(1, Math.round(rect.height));
+    const ctx = finalCanvas.getContext('2d');
+
+    canvases.forEach(canvas => {
+      const cRect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / cRect.width;
+      const scaleY = canvas.height / cRect.height;
+
+      const sx = Math.max(0, (rect.left - cRect.left) * scaleX);
+      const sy = Math.max(0, (rect.top - cRect.top) * scaleY);
+      const sWidth = Math.min(canvas.width - sx, rect.width * scaleX);
+      const sHeight = Math.min(canvas.height - sy, rect.height * scaleY);
+
+      const dx = Math.max(0, cRect.left - rect.left);
+      const dy = Math.max(0, cRect.top - rect.top);
+      const dWidth = Math.min(rect.width - dx, sWidth / scaleX);
+      const dHeight = Math.min(rect.height - dy, sHeight / scaleY);
+
+      try {
+        ctx.drawImage(canvas, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+      } catch(err) {
+        console.warn("[Zen Snipper] Canvas draw error:", err);
+      }
+    });
+
+    const img = document.createElement('img');
+    img.className = 'zen-cropped-image';
+    img.src = finalCanvas.toDataURL('image/png');
+    card.appendChild(img);
+    container.appendChild(card);
+    document.body.appendChild(container);
+
+    document.body.classList.add('zen-snipper-active');
+    applyCurrentTheme();
+
+    const invertBtn = header.querySelector('#zen-crop-invert-btn');
+    if (invertBtn) {
+      invertBtn.addEventListener('click', () => {
+        img.classList.toggle('zen-invert-active');
+      });
+    }
+
+    const copyBtn = header.querySelector('#zen-crop-copy-btn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        finalCanvas.toBlob(blob => {
+          if (blob && navigator.clipboard && navigator.clipboard.write) {
+            navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+              .then(() => showToast("Copied cropped snip to clipboard!", 3000))
+              .catch(() => showToast("Failed to copy image.", 3000));
+          } else {
+            showToast("Copied!", 2000);
+          }
+        });
+      });
+    }
+
+    const closeBtn = header.querySelector('#zen-crop-close-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        resetZenMode();
+      });
+    }
+
+    showToast("Region isolated! Press 'M' for Theme or 'S' for Scratch Pad.", 4000);
+  }
+
   function handleMouseOverDesktop(e) {
-    if (!window.zenIsSelecting) return;
+    if (!window.zenIsSelecting || isDraggingCrop) return;
     e.stopPropagation();
     e.target.classList.add('zen-snipper-hover');
   }
 
   function handleMouseOutDesktop(e) {
-    if (!window.zenIsSelecting) return;
+    if (!window.zenIsSelecting || isDraggingCrop) return;
     e.stopPropagation();
     e.target.classList.remove('zen-snipper-hover');
   }
 
   function handleClickDesktop(e) {
-    if (!window.zenIsSelecting) return;
+    if (!window.zenIsSelecting || isDraggingCrop) return;
     e.preventDefault();
     e.stopPropagation();
     e.target.classList.remove('zen-snipper-hover');
@@ -716,19 +884,31 @@ if (typeof window.zenIsActive === 'undefined') {
       document.addEventListener('click', handleSelectionClickMobile, true);
       showToast("Tap a block to highlight it, then tap the '+' button!", 4000);
     } else {
+      document.addEventListener('mousedown', handleMouseDownCrop, true);
+      document.addEventListener('mousemove', handleMouseMoveCrop, true);
+      document.addEventListener('mouseup', handleMouseUpCrop, true);
       document.addEventListener('mouseover', handleMouseOverDesktop, true);
       document.addEventListener('mouseout', handleMouseOutDesktop, true);
       document.addEventListener('click', handleClickDesktop, true);
-      showToast("Hover and click a block to isolate.", 4000);
+      showToast("Hover to click a block, or click & drag to crop a PDF region!", 4500);
     }
   }
 
   function stopSelectionEvents() {
     window.zenIsSelecting = false;
     document.removeEventListener('click', handleSelectionClickMobile, true);
+    document.removeEventListener('mousedown', handleMouseDownCrop, true);
+    document.removeEventListener('mousemove', handleMouseMoveCrop, true);
+    document.removeEventListener('mouseup', handleMouseUpCrop, true);
     document.removeEventListener('mouseover', handleMouseOverDesktop, true);
     document.removeEventListener('mouseout', handleMouseOutDesktop, true);
     document.removeEventListener('click', handleClickDesktop, true);
+
+    if (cropMarqueeEl) {
+      cropMarqueeEl.remove();
+      cropMarqueeEl = null;
+    }
+    isDraggingCrop = false;
 
     clearMobileSelection();
     document.querySelectorAll('.zen-snipper-hover').forEach(el => {
@@ -922,6 +1102,11 @@ if (typeof window.zenIsActive === 'undefined') {
     window.zenIsActive = false;
     window.zenIsSelecting = false;
     stopSelectionEvents();
+
+    const croppedContainer = document.querySelector('.zen-cropped-view-container');
+    if (croppedContainer) croppedContainer.remove();
+    const marqueeEl = document.getElementById('zen-crop-marquee');
+    if (marqueeEl) marqueeEl.remove();
 
     localStorage.removeItem('zen_mode_url');
     localStorage.removeItem('zen_mode_selector');
